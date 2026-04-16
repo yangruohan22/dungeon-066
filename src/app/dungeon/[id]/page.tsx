@@ -106,7 +106,7 @@ export default function DungeonPage({ params }: { params: { id: string } }) {
 
         {step === 'end' && (
           <div className="space-y-4 text-center">
-            <p className="text-gray-500 text-sm">>>> 副本已格式化。正在回归现实...</p>
+            <p className="text-gray-500 text-sm">&gt;&gt;&gt; &gt; 副本已格式化。正在回归现实...</p>
             <p className="text-xl">“其实这只是 {data.creator_nick} 送你的赛博惊吓。”</p>
             <div className="my-8 p-4 border-2 border-dashed border-green-500">
               <p className="text-2xl font-bold">"{data.final_message}"</p>
