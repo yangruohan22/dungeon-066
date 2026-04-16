@@ -1,0 +1,15 @@
+# 核心保密：忽略所有文件夹下的 .env 文件
+**/.env*
+
+# 巨型依赖：忽略所有文件夹下的 node_modules
+**/node_modules/
+
+# 生产废料：忽略所有文件夹下的编译文件
+**/.next/
+**/out/
+**/build/
+
+# 赛博垃圾
+**/*.log
+**/.DS_Store
+**/Thumbs.db
