@@ -59,7 +59,7 @@ export default function DungeonPage({ params }: { params: { id: string } }) {
           <div className="space-y-4">
             <p>问题 1: 在这种鬼地方，你打算怎么展示个人魅力？</p>
             {matrix.q1.map((opt, i) => (
-              <button key={i} onClick={() => {setPath({...path, q1: i}); setStep('q2')}} className="block w-full text-left p-2 hover:bg-green-900">> {opt.text}</button>
+              <button key={i} onClick={() => {setPath({...path, q1: i}); setStep('q2')}} className="block w-full text-left p-2 hover:bg-green-900">&gt; {opt.text}</button>
             ))}
           </div>
         )}
@@ -68,7 +68,7 @@ export default function DungeonPage({ params }: { params: { id: string } }) {
           <div className="space-y-4">
             <p>问题 2: 此时突然跳出一只盯着你看的野猪，你打算？</p>
             {matrix.q2[path.q1].map((opt, i) => (
-              <button key={i} onClick={() => {setPath({...path, q2: i}); setStep('scene')}} className="block w-full text-left p-2 hover:bg-green-900">> {opt.text}</button>
+              <button key={i} onClick={() => {setPath({...path, q2: i}); setStep('scene')}} className="block w-full text-left p-2 hover:bg-green-900">&gt;&gt;&gt; &gt; {opt.text}</button>
             ))}
           </div>
         )}
