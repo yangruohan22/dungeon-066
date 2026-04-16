@@ -48,9 +48,9 @@ export default function DungeonPage({ params }: { params: { id: string } }) {
         {step === 'intro' && (
           <div className="space-y-4">
             <p className="typing">&gt;&gt;&gt; &gt; 检测到显眼包: {data.target_name}</p>
-            <p>>>> 降临地点: {data.site}</p>
-            <p>>>> 携带神器: {data.item}</p>
-            <p>>>> 系统报告: 该个体曾执行 [{data.lore}]，智力值已归零。</p>
+            <p>&gt;&gt;&gt; &gt; 降临地点: {data.site}</p>
+            <p>&gt;&gt;&gt; &gt; 携带神器: {data.item}</p>
+            <p>&gt;&gt;&gt; &gt; 系统报告: 该个体曾执行 [{data.lore}]，智力值已归零。</p>
             <button onClick={() => setStep('q1')} className="mt-6 border border-green-500 px-4 py-2 hover:bg-green-900"> [ 开启试炼 ] </button>
           </div>
         )}
