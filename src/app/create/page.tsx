@@ -109,7 +109,7 @@ export default function CreateDungeon() {
       {showPay && (
         <div className="fixed inset-0 bg-black/95 flex items-center justify-center p-4 z-50">
           <div className="border-4 border-green-500 p-8 max-w-sm w-full text-center bg-black">
-            <h2 className="text-xl mb-4 text-yellow-500">>>> 支付能量契约</h2>
+            <h2 className="text-xl mb-4 text-yellow-500">&gt;&gt;&gt; &gt; 支付能量契约</h2>
             <div className="bg-white p-2 inline-block mb-4">
                <div className="w-48 h-48 bg-gray-200 flex items-center justify-center text-black text-xs p-4">
                  此处放入你的 0.66 元收款码
