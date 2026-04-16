@@ -32,8 +32,9 @@ export default function CreateDungeon() {
 
   return (
     <div className="min-h-screen p-8 max-w-2xl mx-auto border-x-2 border-green-900 bg-black text-green-500">
-      <h1 className="text-3xl font-bold mb-8 text-center animate-pulse">>>> 副本实验室</h1>
-      
+      <h1 className="text-3xl font-bold mb-8 text-center animate-pulse">
+        &gt;&gt;&gt; &gt; 副本实验室
+      </h1>
       <form onSubmit={handleSubmit} className="space-y-6">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <section className="space-y-4">
