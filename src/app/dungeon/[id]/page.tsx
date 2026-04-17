@@ -187,9 +187,7 @@ export default function DungeonPage({ params }: { params: { id: string } }) {
     }
   };
 
-  // 严格遵循你的要求：
-  // labelClass: 题干/题头 -> 浅棕色、类似宋体 (retro-text)
-  // valueClass: 填入内容/其他说明 -> 深棕色、类似黑体 (font-sans)
+  // 统一定义结算单内部的字体样式
   const labelClass = "retro-text text-[#8b5a2b] text-lg font-bold mb-2 tracking-widest";
   const valueClass = "font-sans text-[#3e3c38] text-xl font-black mb-6 leading-relaxed";
 
@@ -261,7 +259,8 @@ export default function DungeonPage({ params }: { params: { id: string } }) {
         {step === 'cat' && (
           <div className="space-y-6 animate-in fade-in">
             <div className="text-xl font-bold min-h-[80px]">
-              <Typewriter text={`一只会读心术的小猫听到了你的心里话，优雅地走过来：喵喵喵！（你心里话的声音好大！）此时你：`} onComplete={() => setShowOptions(true)} />
+              {/* 【修改】：此时你 前面加了换行 */}
+              <Typewriter text={`一只会读心术的小猫听到了你的心里话，优雅地走过来：喵喵喵！（你心里话的声音好大！）\n此时你：`} onComplete={() => setShowOptions(true)} />
             </div>
             {showOptions && (
               <div className="space-y-4 animate-in slide-in-from-bottom">
@@ -436,7 +435,8 @@ export default function DungeonPage({ params }: { params: { id: string } }) {
 
                 <div className="text-center font-bold text-xl z-10 px-10 leading-loose text-slate-800">
                   {riftPhase === 3 && (
-                    <Typewriter text={`快速穿梭中\n你遗失了【${data.item}】，\n但是【${data.fear_boss}】还跟着你！`} onComplete={() => setShowOptions(true)} />
+                    /* 【修改】：去掉了这里的换行，变成一长句 */
+                    <Typewriter text={`快速穿梭中你遗失了【${data.item}】，但是【${data.fear_boss}】还跟着你！`} onComplete={() => setShowOptions(true)} />
                   )}
                 </div>
               </div>
@@ -510,9 +510,9 @@ export default function DungeonPage({ params }: { params: { id: string } }) {
                   {showSettlement && (
                     <div id="settlement-card" className="w-full retro-paper p-8 md:p-12 rounded-xl text-left animate-in zoom-in mt-6 relative overflow-hidden">
 
-                      <div className="retro-stamp">地球Online<br/>已通关</div>
+                      {/* 【修改】：极简霸气印章，只保留了“已通关” */}
+                      <div className="retro-stamp">已通关</div>
 
-                      {/* 【恢复原味】：严格还原了你要求的题目 */}
                       <h2 className="text-3xl retro-text font-black text-center mb-8 text-[#5c4d3c] border-b-2 border-[#d4c4af] pb-6">
                         【{data.site}】副本结算单
                       </h2>
@@ -521,7 +521,6 @@ export default function DungeonPage({ params }: { params: { id: string } }) {
                         const res = calculateSettlement(route, actionCount, roarCounts, data);
                         return (
                           <div className="space-y-2 mb-8">
-                            {/* 【恢复原味】：严格还原了你的标签文案，但保留了排版和字体 */}
                             <p className={labelClass}>称号</p>
                             <p className={valueClass}>{res.title}</p>
                             <p className={labelClass}>你曾经：</p>
@@ -543,18 +542,22 @@ export default function DungeonPage({ params }: { params: { id: string } }) {
 
                       <div className="retro-divider"></div>
 
+                      {/* 【修改】：统一感谢语为题干格式，并把具体话语分离 */}
+                      <p className={labelClass}>
+                        更可贵的是，你对把你带到【{data.site}】的朋友【{data.creator_nick}】心怀感恩：
+                      </p>
                       <p className={valueClass}>
-                        更可贵的是，你对把你带到【{data.site}】的朋友【{data.creator_nick}】心怀感恩：<br/>
-                        <span className="text-[#8b2b2b] text-2xl mt-3 inline-block font-black">“{thankYouMsg}”</span>
+                        “{thankYouMsg}”
                       </p>
 
                       <p className="text-center font-black text-xl text-[#6b8e23] pt-6 border-t-2 border-[#d4c4af]">
                         本次副本闯关到此全部结束，请收拾好您的行李物品，回归主线任务！加油！
                       </p>
 
+                      {/* 【修改】：统一成了同一字体的页脚 */}
                       <div className="mt-10 pt-4 border-t-2 border-dashed border-[#d4c4af] flex flex-col sm:flex-row justify-between items-center opacity-70 gap-2">
                         <p className="retro-text text-[#8b5a2b] text-sm font-bold tracking-wider">地球Online·专属人生副本</p>
-                        <p className="font-sans text-[#3e3c38] text-sm font-bold">前往 bazinga66.top 为损友定制</p>
+                        <p className="retro-text text-[#8b5a2b] text-sm font-bold tracking-wider">前往 bazinga66.top 为损友定制</p>
                       </div>
 
                       <button
