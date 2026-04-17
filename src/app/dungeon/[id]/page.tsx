@@ -3,7 +3,7 @@ import { useState, useEffect, useRef } from 'react';
 import { supabase } from '@/lib/supabase';
 import { getRouteConfig, calculateSettlement } from '../../../config/story';
 
-// 【修改版】：带停顿呼吸感的打字机
+// 带停顿呼吸感的打字机
 const Typewriter = ({ text, onComplete }: { text: string; onComplete?: () => void }) => {
   const [displayedText, setDisplayedText] = useState("");
   const timerRef = useRef<NodeJS.Timeout | null>(null);
@@ -19,7 +19,6 @@ const Typewriter = ({ text, onComplete }: { text: string; onComplete?: () => voi
       if (i >= text.length) {
         if (timerRef.current) clearInterval(timerRef.current);
         if (onComplete) {
-          // 【核心】：打完之后停顿 600ms，再渲染后续选项
           setTimeout(() => {
             onComplete();
           }, 600);
@@ -62,14 +61,19 @@ export default function DungeonPage({ params }: { params: { id: string } }) {
   const [showPaper, setShowPaper] = useState(false);
   const [showSettlement, setShowSettlement] = useState(false);
 
-  // 纯净淡入淡出 Toast
+  // 【终极修复版 Toast】：双状态控制，彻底杜绝内容清空导致的框体坍塌/缩小
   const [toastMsg, setToastMsg] = useState('');
+  const [toastVisible, setToastVisible] = useState(false);
   const [toastTimer, setToastTimer] = useState<NodeJS.Timeout | null>(null);
 
   const showToast = (msg: string, duration = 1500) => {
-    setToastMsg(msg);
+    setToastMsg(msg);           // 1. 设置内容
+    setToastVisible(true);      // 2. 瞬间显示
     if (toastTimer) clearTimeout(toastTimer);
-    const timer = setTimeout(() => setToastMsg(''), duration);
+
+    const timer = setTimeout(() => {
+      setToastVisible(false);   // 3. 时间到，只改变透明度淡出（文字保留撑住框体）
+    }, duration);
     setToastTimer(timer);
   };
 
@@ -168,8 +172,8 @@ export default function DungeonPage({ params }: { params: { id: string } }) {
   return (
     <div className="min-h-screen w-full bg-[#f1f5f9] flex flex-col items-center justify-center p-4">
 
-      {/* 瞬间出现、淡出消失的 Toast */}
-      <div className={`fixed top-12 left-0 right-0 z-50 flex justify-center pointer-events-none ${toastMsg ? 'opacity-100 transition-none' : 'opacity-0 transition-opacity duration-500'}`}>
+      {/* 这里的 transition-opacity duration-500 负责平滑的淡出，由于文字没清空，框就不会塌缩了 */}
+      <div className={`fixed top-12 left-0 right-0 z-50 flex justify-center pointer-events-none transition-opacity duration-500 ${toastVisible ? 'opacity-100' : 'opacity-0'}`}>
         <div className="bg-slate-900/95 text-white px-8 py-4 rounded-2xl shadow-2xl font-bold text-lg text-center max-w-[90%] break-words">
           {toastMsg}
         </div>
@@ -450,7 +454,6 @@ export default function DungeonPage({ params }: { params: { id: string } }) {
                   {showPaper && (
                     <div id="note-card" className="sticky-note p-10 mt-6 min-h-[140px] w-[90%] max-w-sm transform -rotate-2 animate-in zoom-in text-left relative flex items-center justify-center text-slate-800">
                       <p className="text-2xl font-bold leading-relaxed">{data.final_message}</p>
-                      {/* 【新增】：小纸条专属保存按钮，绝对定位在右下角 */}
                       <button id="dl-note-btn" onClick={handleDownloadNote} className="absolute bottom-3 right-4 text-slate-400 hover:text-slate-600 font-bold text-sm">
                         💾 保存
                       </button>
