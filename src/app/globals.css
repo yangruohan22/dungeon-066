@@ -26,3 +26,22 @@ input:focus, textarea:focus {
   left: 50%;
   transform-origin: 0 0;
 }
+
+/* 结算页面的复古纸张质感 */
+.retro-paper {
+  background-color: #fcf5e5; /* 泛黄的老纸张底色 */
+  background-image: url("data:image/svg+xml,%3Csvg width='100' height='100' viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100' height='100' filter='url(%23noise)' opacity='0.05'/%3E%3C/svg%3E");
+  color: #2c2825;
+  box-shadow: inset 0 0 40px rgba(139, 69, 19, 0.1), 0 10px 25px rgba(0,0,0,0.1);
+  border: 1px solid #e0d0b8;
+}
+
+.retro-text {
+  font-family: Georgia, 'Times New Roman', serif;
+  letter-spacing: 0.05em;
+}
+
+.retro-divider {
+  border-top: 2px dashed #d4c4af;
+  margin: 1.5rem 0;
+}
