@@ -1,5 +1,6 @@
 'use client';
 import { useState } from 'react';
+import { supabase } from '@/lib/supabase'; // 确保路径正确
 
 export default function CreateDungeon() {
   const [formData, setFormData] = useState({
@@ -16,18 +17,34 @@ export default function CreateDungeon() {
   });
 
   const [showPay, setShowPay] = useState(false);
+  const [isPaid, setIsPaid] = useState(false); // 新增：支付状态
   const [createdId, setCreatedId] = useState('');
+  const [loading, setLoading] = useState(false);
 
   const handleChange = (e: any) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
-  const handleSubmit = (e: any) => {
+  const handleSubmit = async (e: any) => {
     e.preventDefault();
-    // 随机生成一个ID模拟保存
-    const mockId = Math.random().toString(36).substring(7);
-    setCreatedId(mockId);
+    setLoading(true);
+
+    // 真正的数据库插入逻辑
+    const { data, error } = await supabase
+      .from('dungeons')
+      .insert([formData])
+      .select()
+      .single();
+
+    if (error) {
+      alert('主神空间能量波动（保存失败）：' + error.message);
+      setLoading(false);
+      return;
+    }
+
+    setCreatedId(data.id);
     setShowPay(true);
+    setLoading(false);
   };
 
   return (
@@ -35,6 +52,7 @@ export default function CreateDungeon() {
       <h1 className="text-3xl font-bold mb-8 text-center animate-pulse">
         &gt;&gt;&gt; &gt; 副本实验室
       </h1>
+
       <form onSubmit={handleSubmit} className="space-y-6">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <section className="space-y-4">
@@ -97,30 +115,56 @@ export default function CreateDungeon() {
         </section>
 
         <div className="pt-8 text-center">
-          <button type="submit" className="bg-green-600 text-black px-12 py-3 font-bold hover:bg-green-400 transition-all terminal-border">
-            [ 封印该个体 ]
+          <button
+            type="submit"
+            disabled={loading}
+            className="bg-green-600 text-black px-12 py-3 font-bold hover:bg-green-400 transition-all terminal-border disabled:opacity-50"
+          >
+            {loading ? '[ 正在刻录... ]' : '[ 封印该个体 ]'}
           </button>
-          <p className="text-[10px] text-gray-600 mt-4 leading-relaxed">
-            免责声明：本工具仅供好友间无伤大雅的娱乐。您承诺输入内容不含违法、造谣、人身攻击。产生的法律后果由创建者承担。点击“封印”即代表您已阅读并同意《主神空间行为准则》。
-          </p>
         </div>
       </form>
 
       {showPay && (
         <div className="fixed inset-0 bg-black/95 flex items-center justify-center p-4 z-50">
           <div className="border-4 border-green-500 p-8 max-w-sm w-full text-center bg-black">
-            <h2 className="text-xl mb-4 text-yellow-500">&gt;&gt;&gt; &gt; 支付能量契约</h2>
-            <div className="bg-white p-2 inline-block mb-4">
-               <div className="w-48 h-48 bg-gray-200 flex items-center justify-center text-black text-xs p-4">
-                 此处放入你的 0.66 元收款码
-               </div>
-            </div>
-            <p className="text-xs mb-6 opacity-70">由于主神正在闭关，请扫码付 0.66 元。目前仅支持人工解锁，完成后请刷新本页查看链接。</p>
-            <p className="text-green-500 text-sm break-all font-mono">
-              预览链接(支付后生效): <br/>
-              {typeof window !== 'undefined' ? window.location.origin : ''}/dungeon/{createdId}
-            </p>
-            <button onClick={() => setShowPay(false)} className="mt-6 text-gray-500 underline text-xs"> 返回修改 </button>
+            <h2 className="text-xl mb-4 text-yellow-500">&gt;&gt;&gt; &gt; 能量契约</h2>
+
+            {!isPaid ? (
+              <>
+                <div className="bg-white p-2 inline-block mb-4">
+                  <div className="w-48 h-48 bg-gray-200 flex items-center justify-center text-black text-xs p-4">
+                    [ 此处放入你的收款码图片 ]
+                  </div>
+                </div>
+                <p className="text-xs mb-6 opacity-70">主神系统检测到 0.66 元能量缺口。请支付以激活副本。</p>
+                <button
+                  onClick={() => setIsPaid(true)}
+                  className="w-full bg-green-600 text-black py-2 font-bold hover:bg-green-400"
+                >
+                  我已支付
+                </button>
+              </>
+            ) : (
+              <div className="animate-in fade-in zoom-in duration-300">
+                <p className="text-green-500 text-sm mb-4">契约已达成，副本链接已生成：</p>
+                <div className="p-2 border border-green-500 bg-green-900/20 break-all font-mono text-xs mb-6">
+                  {typeof window !== 'undefined' ? window.location.origin : ''}/dungeon/{createdId}
+                </div>
+                <button
+                  onClick={() => {
+                    const url = `${window.location.origin}/dungeon/${createdId}`;
+                    navigator.clipboard.writeText(url);
+                    alert('链接已复制，去发给 Ta 吧！');
+                  }}
+                  className="w-full bg-yellow-600 text-black py-2 font-bold mb-2"
+                >
+                  点击复制链接
+                </button>
+              </div>
+            )}
+
+            <button onClick={() => setShowPay(false)} className="mt-4 text-gray-500 underline text-xs"> 返回 </button>
           </div>
         </div>
       )}
