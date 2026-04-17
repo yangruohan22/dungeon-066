@@ -30,10 +30,10 @@ export default function HomePage() {
 
         <div className="space-y-4 text-left bg-slate-50 border-4 border-slate-900 p-6 rounded-2xl mb-10">
           <p className="text-lg font-bold text-slate-600">
-            <span className="text-red-500 mr-2">⚠️</span> 警告：本系统极具杀伤力！
+            <span className="text-red-500 mr-2">⚠️</span> 警告：本系统没什么杀伤力！
           </p>
           <p className="text-md font-bold text-slate-500 leading-relaxed">
-            在这里，你可以为你的损友量身定制一场充满“社会性死亡”、时空裂缝、无情猫猫判官以及终极拷问的专属试炼。
+            在这里，你可以为你的损友量身定制一场天马行空的副本冒险。对朋友了解越深，制作出的副本越好玩哦~
           </p>
         </div>
 
@@ -41,11 +41,11 @@ export default function HomePage() {
           onClick={() => router.push('/create')}
           className="w-full bg-slate-900 text-white py-6 rounded-2xl font-black text-2xl hover:bg-blue-600 transition-all shadow-[6px_6px_0_#334155] active:translate-y-1 active:shadow-none"
         >
-          [ 立即开启炼丹 ]
+          [ 开启炼丹 ]
         </button>
 
         <p className="mt-8 text-sm font-bold text-slate-400">
-          Powered by {new Date().getFullYear()} 损友制造局
+          Powered by {new Date().getFullYear()} Bazinga制造局
         </p>
       </div>
 
