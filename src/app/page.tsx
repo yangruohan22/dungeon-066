@@ -18,6 +18,7 @@ export default function HomePage() {
           🌍
         </div>
 
+
         <h1 className="text-4xl md:text-5xl font-black text-slate-900 mb-4 tracking-widest">
           地球Online
         </h1>
