@@ -3,11 +3,12 @@ import { useState, useEffect, useRef } from 'react';
 import { supabase } from '@/lib/supabase';
 import { getRouteConfig, calculateSettlement } from '../../../config/story';
 
-// 带停顿呼吸感的打字机
+// 带停顿呼吸感的打字机 (彻底修复重打 Bug 版)
 const Typewriter = ({ text, onComplete }: { text: string; onComplete?: () => void }) => {
   const [displayedText, setDisplayedText] = useState("");
   const timerRef = useRef<NodeJS.Timeout | null>(null);
 
+  // 使用 ref 存住最新的回调函数，避免引发重复渲染
   const onCompleteRef = useRef(onComplete);
   useEffect(() => {
     onCompleteRef.current = onComplete;
@@ -34,7 +35,7 @@ const Typewriter = ({ text, onComplete }: { text: string; onComplete?: () => voi
     return () => {
       if (timerRef.current) clearInterval(timerRef.current);
     };
-  }, [text]);
+  }, [text]); // 只监听 text，剔除 onComplete
 
   return <span className="whitespace-pre-wrap">{displayedText}</span>;
 };
@@ -42,15 +43,18 @@ const Typewriter = ({ text, onComplete }: { text: string; onComplete?: () => voi
 export default function DungeonPage({ params }: { params: { id: string } }) {
   const [data, setData] = useState<any>(null);
 
+  // 核心状态机
   const [step, setStep] = useState('intro');
   const [route, setRoute] = useState(0);
   const [thankYouMsg, setThankYouMsg] = useState('');
 
+  // 数据收集器
   const [actionCount, setActionCount] = useState(0);
   const [roarCounts, setRoarCounts] = useState<Record<string, number>>({});
   const [talents, setTalents] = useState<string[]>([]);
   const [currentTalent, setCurrentTalent] = useState('');
 
+  // UI 控制状态
   const [showOptions, setShowOptions] = useState(false);
   const [showAllCatOptions, setShowAllCatOptions] = useState(false);
   const [hasClickedC, setHasClickedC] = useState(false);
@@ -59,11 +63,14 @@ export default function DungeonPage({ params }: { params: { id: string } }) {
   const [bossFails, setBossFails] = useState(0);
   const [bossInput, setBossInput] = useState('');
 
+  // 最终页展开状态
   const [showPaper, setShowPaper] = useState(false);
   const [showSettlement, setShowSettlement] = useState(false);
 
+  // 时空裂缝演出状态机
   const [riftPhase, setRiftPhase] = useState(0);
 
+  // 纯净 Toast：无淡入，有淡出
   const [toastMsg, setToastMsg] = useState('');
   const [toastVisible, setToastVisible] = useState(false);
   const [toastTimer, setToastTimer] = useState<NodeJS.Timeout | null>(null);
@@ -187,6 +194,7 @@ export default function DungeonPage({ params }: { params: { id: string } }) {
   return (
     <div className="min-h-screen w-full bg-[#f1f5f9] flex flex-col items-center justify-center p-4">
 
+      {/* Toast 提示框 */}
       <div className={`fixed top-12 left-0 right-0 z-50 flex justify-center pointer-events-none transition-opacity duration-500 ${toastVisible ? 'opacity-100' : 'opacity-0'}`}>
         <div className="bg-slate-900/95 text-white px-8 py-4 rounded-2xl shadow-2xl font-bold text-lg text-center max-w-[90%] break-words">
           {toastMsg}
@@ -251,6 +259,7 @@ export default function DungeonPage({ params }: { params: { id: string } }) {
         {step === 'cat' && (
           <div className="space-y-6 animate-in fade-in">
             <div className="text-xl font-bold min-h-[80px]">
+              {/* 【修改】：此时你前面加了换行 */}
               <Typewriter text={`一只会读心术的小猫听到了你的心里话，优雅地走过来：喵喵喵！（你心里话的声音好大！）\n此时你：`} onComplete={() => setShowOptions(true)} />
             </div>
             {showOptions && (
@@ -426,6 +435,7 @@ export default function DungeonPage({ params }: { params: { id: string } }) {
 
                 <div className="text-center font-bold text-xl z-10 px-10 leading-loose text-slate-800">
                   {riftPhase === 3 && (
+                    /* 【修改】：去掉了这里的换行 */
                     <Typewriter text={`快速穿梭中你遗失了【${data.item}】，但是【${data.fear_boss}】还跟着你！`} onComplete={() => setShowOptions(true)} />
                   )}
                 </div>
@@ -500,8 +510,8 @@ export default function DungeonPage({ params }: { params: { id: string } }) {
                   {showSettlement && (
                     <div id="settlement-card" className="w-full retro-paper p-8 md:p-12 rounded-xl text-left animate-in zoom-in mt-6 relative overflow-hidden">
 
-                      {/* 【新增】：绝对防漏的纯 Tailwind 手捏印章，强制右上角 */}
-                      <div className="absolute top-6 right-6 w-24 h-24 border-[5px] border-double border-red-700/70 rounded-full text-red-700 font-black flex items-center justify-center -rotate-12 opacity-70 text-xl tracking-widest font-serif z-10 pointer-events-none mix-blend-multiply select-none">
+                      {/* 【绝对保证存在的印章】：纯 Tailwind 强制定位于右上角 */}
+                      <div className="absolute top-6 right-6 w-24 h-24 border-[5px] border-double border-red-700/70 rounded-full text-red-700 font-black flex items-center justify-center -rotate-12 opacity-70 text-2xl tracking-widest font-serif z-10 pointer-events-none mix-blend-multiply select-none">
                         已通关
                       </div>
 
@@ -523,7 +533,7 @@ export default function DungeonPage({ params }: { params: { id: string } }) {
 
                       <div className="retro-divider"></div>
 
-                      {/* 【修改】：变成了题干字体 (浅棕色、复古宋体) */}
+                      {/* 【修改】：变成了题干字体样式 */}
                       <p className={`${labelClass} mb-6 leading-relaxed`}>
                         在【地球Online】游戏副本中，你掉进了时空裂缝，与【{data.fear_boss}】狭路相逢，经历了太多太多不如意的事情。
                       </p>
@@ -535,10 +545,11 @@ export default function DungeonPage({ params }: { params: { id: string } }) {
 
                       <div className="retro-divider"></div>
 
-                      <p className={labelClass}>
+                      {/* 【修改】：变成了题干字体样式 */}
+                      <p className={`${labelClass} leading-relaxed`}>
                         更可贵的是，你对把你带到【{data.site}】的朋友【{data.creator_nick}】心怀感恩：
                       </p>
-                      <p className={valueClass}>
+                      <p className={`${valueClass} mt-3`}>
                         “{thankYouMsg}”
                       </p>
 
@@ -546,9 +557,10 @@ export default function DungeonPage({ params }: { params: { id: string } }) {
                         本次副本闯关到此全部结束，请收拾好您的行李物品，回归主线任务！加油！
                       </p>
 
+                      {/* 【修改】：左右两侧页脚字体均统一为题干浅棕色宋体 */}
                       <div className="mt-10 pt-4 border-t-2 border-dashed border-[#d4c4af] flex flex-col sm:flex-row justify-between items-center opacity-70 gap-2">
-                        <p className="retro-text text-[#8b5a2b] text-sm font-bold tracking-wider">地球Online·专属人生副本</p>
-                        <p className="retro-text text-[#8b5a2b] text-sm font-bold tracking-wider">前往 bazinga66.top 为损友定制</p>
+                        <p className={`${labelClass} mb-0 text-sm`}>地球Online·专属人生副本</p>
+                        <p className={`${labelClass} mb-0 text-sm`}>前往 bazinga66.top 为损友定制</p>
                       </div>
 
                       <button

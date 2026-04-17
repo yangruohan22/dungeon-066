@@ -1,6 +1,7 @@
 'use client';
 import { useState } from 'react';
 import { supabase } from '@/lib/supabase';
+import LegalFooter from '@/components/LegalFooter';
 
 export default function CreateDungeon() {
   const [formData, setFormData] = useState({
@@ -32,8 +33,8 @@ export default function CreateDungeon() {
   };
 
   return (
-    <main className="min-h-screen w-full bg-[#f1f5f9] flex flex-col items-center py-12 px-4 font-sans">
-      <div className="bg-white max-w-3xl w-full border-4 border-slate-900 rounded-3xl shadow-[12px_12px_0_#1e293b] p-8 md:p-12">
+    <main className="min-h-screen w-full bg-[#f1f5f9] flex flex-col items-center py-12 px-4 font-sans relative">
+      <div className="bg-white max-w-3xl w-full border-4 border-slate-900 rounded-3xl shadow-[12px_12px_0_#1e293b] p-8 md:p-12 mb-8 z-10">
         <h1 className="text-3xl md:text-4xl font-black mb-12 text-center text-slate-900 tracking-wider">
           [ 副本生成器 ]
         </h1>
@@ -122,6 +123,9 @@ export default function CreateDungeon() {
           </div>
         </div>
       )}
+
+      {/* 将合规页脚放在这里 */}
+      <LegalFooter />
     </main>
   );
 }

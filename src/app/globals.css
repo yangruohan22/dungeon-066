@@ -35,8 +35,9 @@ input:focus, textarea:focus {
   border: 1px solid #e0d0b8;
 }
 
+/* 题干/题头专用的复古宋体 */
 .retro-text {
-  font-family: Georgia, 'Times New Roman', serif;
+  font-family: Georgia, "STSong", "SimSun", serif;
   letter-spacing: 0.05em;
 }
 
@@ -66,7 +67,7 @@ input:focus, textarea:focus {
   transform: rotate(-3deg);
 }
 
-/* 【新增】：时空裂缝专属动画序列 */
+/* 时空裂缝专属动画序列 */
 @keyframes fierce-shake {
   0%, 100% { transform: translateX(0) translateY(0) rotate(0); }
   10%, 30%, 50%, 70%, 90% { transform: translateX(-12px) translateY(-6px) rotate(-1.5deg); }
@@ -84,6 +85,10 @@ input:focus, textarea:focus {
   animation: spin-scale 1.2s cubic-bezier(0.25, 1, 0.5, 1) forwards;
 }
 
+@keyframes slow-spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
 .animate-slow-spin {
-  animation: spin 12s linear infinite;
+  animation: slow-spin 12s linear infinite;
 }
