@@ -9,6 +9,7 @@ export default function CreateDungeon() {
   });
 
   const [showPay, setShowPay] = useState(false);
+  const [isPaid, setIsPaid] = useState(false); // 新增：控制是否已支付的状态
   const [createdId, setCreatedId] = useState('');
   const [loading, setLoading] = useState(false);
 
@@ -22,6 +23,7 @@ export default function CreateDungeon() {
     const { data, error } = await supabase.from('dungeons').insert([formData]).select().single();
     if (!error) {
       setCreatedId(data.id);
+      setIsPaid(false); // 每次新生成时重置支付状态
       setShowPay(true);
     } else {
       alert("创建失败，网络波动！");
@@ -30,8 +32,7 @@ export default function CreateDungeon() {
   };
 
   return (
-    // 强制居中并添加垂直滚动（因为表单内容较长）
-    <main className="min-h-screen w-full bg-[#f1f5f9] flex flex-col items-center py-12 px-4">
+    <main className="min-h-screen w-full bg-[#f1f5f9] flex flex-col items-center py-12 px-4 font-sans">
 
       {/* 居中大卡片 */}
       <div className="bg-white max-w-3xl w-full border-4 border-slate-900 rounded-3xl shadow-[12px_12px_0_#1e293b] p-8 md:p-12">
@@ -106,26 +107,49 @@ export default function CreateDungeon() {
         </form>
       </div>
 
-      {/* 支付弹窗 */}
+      {/* 支付与链接弹窗 */}
       {showPay && (
         <div className="fixed inset-0 bg-slate-900/80 flex items-center justify-center p-4 z-50">
           <div className="bg-white border-4 border-slate-900 p-8 max-w-sm w-full text-center rounded-3xl shadow-[12px_12px_0_#000] animate-in zoom-in duration-300">
-            <h2 className="text-3xl font-black mb-6 text-slate-800">达成契约</h2>
-            <div className="w-48 h-48 bg-slate-100 mx-auto mb-6 flex items-center justify-center border-4 border-dashed border-slate-400 rounded-2xl">
-               <span className="text-slate-400 font-bold">此处放收款码</span>
-            </div>
-            <p className="font-bold mb-8 text-slate-500 text-sm">支付 0.66 元，系统将激活该副本。</p>
-            <button
-              onClick={() => {
-                const url = `${window.location.origin}/dungeon/${createdId}`;
-                navigator.clipboard.writeText(url);
-                alert('链接已复制到剪贴板！');
-              }}
-              className="w-full bg-blue-600 text-white py-4 rounded-xl font-bold text-xl mb-4 shadow-[4px_4px_0_#1e3a8a] active:translate-y-1 transition-all"
-            >
-              已支付，复制链接
-            </button>
-            <button onClick={() => setShowPay(false)} className="text-slate-400 hover:text-slate-600 underline font-bold"> 返回修改 </button>
+
+            {!isPaid ? (
+              // 步骤一：扫码支付页面
+              <>
+                <h2 className="text-3xl font-black mb-6 text-slate-800">达成契约</h2>
+                <div className="w-48 h-48 bg-slate-100 mx-auto mb-6 flex items-center justify-center border-4 border-dashed border-slate-400 rounded-2xl">
+                   <span className="text-slate-400 font-bold">此处放收款码</span>
+                </div>
+                <p className="font-bold mb-8 text-slate-500 text-sm">支付 0.66 元，系统将激活该副本。</p>
+                <button
+                  onClick={() => setIsPaid(true)}
+                  className="w-full bg-blue-600 text-white py-4 rounded-xl font-bold text-xl mb-4 shadow-[4px_4px_0_#1e3a8a] active:translate-y-1 transition-all"
+                >
+                  我已支付
+                </button>
+                <button onClick={() => setShowPay(false)} className="text-slate-400 hover:text-slate-600 underline font-bold"> 返回修改 </button>
+              </>
+            ) : (
+              // 步骤二：直接展示链接页面
+              <div className="animate-in fade-in zoom-in duration-500">
+                <h2 className="text-2xl font-black mb-4 text-green-600">契约已生效！</h2>
+                <p className="font-bold mb-4 text-slate-600 text-sm">请长按下方文字框手动复制链接：</p>
+
+                {/* 链接展示框：使用了 select-all，点一下或者长按就能选中全部 */}
+                <div className="bg-blue-50 border-4 border-slate-900 p-4 rounded-2xl mb-8 break-all select-all cursor-text text-left">
+                  <span className="text-slate-800 font-bold text-lg leading-relaxed">
+                    {typeof window !== 'undefined' ? window.location.origin : ''}/dungeon/{createdId}
+                  </span>
+                </div>
+
+                <button
+                  onClick={() => window.location.reload()}
+                  className="w-full bg-slate-900 text-white py-4 rounded-xl font-bold text-xl shadow-[4px_4px_0_#334155] active:translate-y-1 transition-all"
+                >
+                  完成并再整一个
+                </button>
+              </div>
+            )}
+
           </div>
         </div>
       )}
