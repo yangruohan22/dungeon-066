@@ -9,7 +9,7 @@ export const getRouteConfig = (route: number, d: any) => {
     7: { text: `小猫走到你旁边，开始八字形绕着你的脚走：`, actionBtn: `更害怕了，大叫起来`, limit: 9999, normalAlert: ['咕咕嘎嘎！', '呕吼！', '啊！', '嘻嘻嘻！', '古咕固！'], limitAlert: ``, advanceBtn: `我给你表演才艺你能不能放过我`, talentType: 'cat' },
     8: { text: `小猫绕过【${d.item}】，走到你旁边，开始八字形绕着你的脚走：`, actionBtn: `更害怕了，大叫起来`, limit: 9999, normalAlert: ['咕咕嘎嘎！', '呕吼！', '啊！', '嘻嘻嘻！', '古咕固！'], limitAlert: ``, advanceBtn: `我给你表演才艺你能不能放过我`, talentType: 'cat' },
     9: { text: `怎么可以这样对小猫！你的举动触怒了神灵，判你在此副本内永远不能摆脱【${d.fear_boss}】：`, actionBtn: `我命由我不由天，我跑！`, limit: 200, normalAlert: `你跑了1公里。`, limitAlert: `不能再跑了，会出人命的！`, advanceBtn: `给小猫表演才艺，试图赎罪`, talentType: 'cat' },
-    10: { text: `小猫松开了口中的月亮`, actionBtn: `月亮是个什么味？我也尝尝。`, limit: 10, normalAlert: `月亮变小了一点。`, limitAlert: `月亮消失了！天上的人指着你说，看到了吗，那就是天狗食月。`, advanceBtn: `小猫真乖，给你表演个才艺吧`, talentType: 'cat' },
+    10: { text: `小猫松开了口中的月亮`, actionBtn: `月亮是个什么味？我也尝尝。`, limit: 10, normalAlert: `月亮变小了一点。`, limitAlert: `月亮消失了！地上的人指着你说，看到了吗，那就是天狗食月。`, advanceBtn: `小猫真乖，给你表演个才艺吧`, talentType: 'cat' },
     11: { text: `小猫咂了咂嘴，它不想吃【${d.fear_boss}】。`, actionBtn: `再喂一次`, limit: 9999, isMoving: true, normalAlert: ['喵喵！', '喵喵喵！', '喵。'], limitAlert: ``, advanceBtn: `那我来表演段才艺吧`, talentType: 'cat' },
     12: { text: `小猫看了你一眼：喵喵喵？（那玩意能好吃吗？）`, actionBtn: `热情地递给小猫，你想吃吗？不给~`, limit: 100, normalAlert: `小猫扑了个空`, limitAlert: `小猫累了，求你住手吧。`, advanceBtn: `嘿嘿，被你发现了，给你表演个才艺吧`, talentType: 'cat' }
   };
