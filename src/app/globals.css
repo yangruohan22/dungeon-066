@@ -45,7 +45,7 @@ input:focus, textarea:focus {
   margin: 1.5rem 0;
 }
 
-/* 【新增】：真实的小纸条便利贴效果（带胶带） */
+/* 真实的小纸条便利贴效果（带胶带） */
 .sticky-note {
   background: #fdf5c9;
   position: relative;
@@ -58,10 +58,32 @@ input:focus, textarea:focus {
   position: absolute;
   top: -12px;
   left: 50%;
-  margin-left: -40px; /* 居中 */
+  margin-left: -40px;
   width: 80px;
   height: 25px;
-  background: rgba(255, 255, 255, 0.5); /* 胶带半透明质感 */
+  background: rgba(255, 255, 255, 0.5);
   box-shadow: 0 1px 2px rgba(0,0,0,0.1);
   transform: rotate(-3deg);
+}
+
+/* 【新增】：时空裂缝专属动画序列 */
+@keyframes fierce-shake {
+  0%, 100% { transform: translateX(0) translateY(0) rotate(0); }
+  10%, 30%, 50%, 70%, 90% { transform: translateX(-12px) translateY(-6px) rotate(-1.5deg); }
+  20%, 40%, 60%, 80% { transform: translateX(12px) translateY(6px) rotate(1.5deg); }
+}
+.animate-fierce-shake {
+  animation: fierce-shake 0.4s ease-in-out infinite;
+}
+
+@keyframes spin-scale {
+  0% { transform: scale(0.1) rotate(0deg); opacity: 0; }
+  100% { transform: scale(1) rotate(720deg); opacity: 1; }
+}
+.animate-spin-scale {
+  animation: spin-scale 1.2s cubic-bezier(0.25, 1, 0.5, 1) forwards;
+}
+
+.animate-slow-spin {
+  animation: spin 12s linear infinite;
 }
