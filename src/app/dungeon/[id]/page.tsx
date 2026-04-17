@@ -3,10 +3,16 @@ import { useState, useEffect, useRef } from 'react';
 import { supabase } from '@/lib/supabase';
 import { getRouteConfig, calculateSettlement } from '../../../config/story';
 
-// 带停顿呼吸感的打字机
+// 带停顿呼吸感的打字机 (终极修复重打Bug版)
 const Typewriter = ({ text, onComplete }: { text: string; onComplete?: () => void }) => {
   const [displayedText, setDisplayedText] = useState("");
   const timerRef = useRef<NodeJS.Timeout | null>(null);
+
+  // 【修复核心】：用 ref 存住最新的回调函数，避免引发重复渲染
+  const onCompleteRef = useRef(onComplete);
+  useEffect(() => {
+    onCompleteRef.current = onComplete;
+  }, [onComplete]);
 
   useEffect(() => {
     setDisplayedText("");
@@ -18,10 +24,10 @@ const Typewriter = ({ text, onComplete }: { text: string; onComplete?: () => voi
       i++;
       if (i >= text.length) {
         if (timerRef.current) clearInterval(timerRef.current);
-        if (onComplete) {
+        if (onCompleteRef.current) {
           setTimeout(() => {
-            onComplete();
-          }, 600); // 打完字后停顿 600ms
+            if (onCompleteRef.current) onCompleteRef.current();
+          }, 600); // 停顿 600ms
         }
       }
     }, 45);
@@ -29,11 +35,10 @@ const Typewriter = ({ text, onComplete }: { text: string; onComplete?: () => voi
     return () => {
       if (timerRef.current) clearInterval(timerRef.current);
     };
-  }, [text, onComplete]);
+  }, [text]); // 【修复核心】：这里只监听 text 变化，把 onComplete 踢出去！
 
   return <span className="whitespace-pre-wrap">{displayedText}</span>;
 };
-
 export default function DungeonPage({ params }: { params: { id: string } }) {
   const [data, setData] = useState<any>(null);
 
