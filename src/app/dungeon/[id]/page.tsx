@@ -1,139 +1,146 @@
 'use client';
 import { useState, useEffect } from 'react';
 import { STORY_MATRIX } from '../../../config/story';
-import { supabase } from '@/lib/supabase'; // 确保路径正确
+import { supabase } from '@/lib/supabase';
+
+const Typewriter = ({ text, onComplete }: { text: string; onComplete?: () => void }) => {
+  const [displayedText, setDisplayedText] = useState("");
+  useEffect(() => {
+    setDisplayedText("");
+    let i = 0;
+    const timer = setInterval(() => {
+      setDisplayedText((prev) => prev + text.charAt(i));
+      i++;
+      if (i >= text.length) {
+        clearInterval(timer);
+        if (onComplete) onComplete();
+      }
+    }, 40);
+    return () => clearInterval(timer);
+  }, [text, onComplete]);
+  return <span className="whitespace-pre-wrap">{displayedText}</span>;
+};
 
 export default function DungeonPage({ params }: { params: { id: string } }) {
   const [step, setStep] = useState('intro');
   const [path, setPath] = useState({ q1: 0, q2: 0 });
-  const [attempts, setAttempts] = useState(0);
   const [input, setInput] = useState('');
   const [data, setData] = useState<any>(null);
-  const [error, setError] = useState(false);
+  const [showOptions, setShowOptions] = useState(false);
 
   useEffect(() => {
     const fetchDungeon = async () => {
-      const { data: dungeonData, error } = await supabase
-        .from('dungeons')
-        .select('*')
-        .eq('id', params.id)
-        .single();
-
-      if (error || !dungeonData) {
-        console.error("加载失败:", error);
-        setError(true);
-        return;
-      }
-      setData(dungeonData);
+      const { data: d } = await supabase.from('dungeons').select('*').eq('id', params.id).single();
+      if (d) setData(d);
     };
-
-    if (params.id) {
-      fetchDungeon();
-    }
+    fetchDungeon();
   }, [params.id]);
 
-  if (error) return <div className="p-10 text-red-500 bg-black min-h-screen font-mono">&gt; 错误：副本已湮灭。</div>;
-  if (!data) return <div className="p-10 text-green-500 bg-black min-h-screen font-mono animate-pulse">&gt; 正在同步主神空间数据...</div>;
+  if (!data) return <div className="min-h-screen bg-[#f8fafc] flex items-center justify-center font-bold text-slate-400">正在链接主神位面...</div>;
 
   const matrix = STORY_MATRIX(data);
 
-  const handleVerify = () => {
-    if (input.trim() === data.spell_answer) {
-      setStep('end');
-    } else {
-      setAttempts(prev => prev + 1);
-      alert("逻辑验证失败。系统提示：Ta 的智力似乎还停留在 [" + data.lore + "] 阶段。");
-    }
-  };
-
   return (
-    <div className="min-h-screen flex items-center justify-center p-4 relative overflow-hidden bg-black text-green-500 font-mono">
-      <div className="scanline"></div>
-      <div className="max-w-xl w-full p-8 terminal-border bg-black relative z-10">
+    <main className="min-h-screen bg-[#e2e8f0] flex flex-col items-center justify-center p-4 text-slate-800">
+      <div className="max-w-2xl w-full bg-white border-4 border-slate-800 rounded-2xl shadow-[8px_8px_0_#475569] p-8 md:p-12 relative overflow-hidden">
 
-        {step === 'intro' && (
-          <div className="space-y-4">
-            <p className="typing">&gt;&gt;&gt; &gt; 目标确认: {data.target_name}</p>
-            <p>&gt;&gt;&gt; &gt; 降临坐标: {data.site}</p>
-            <p>&gt;&gt;&gt; &gt; 绑定神器: {data.item}</p>
-            <p>&gt;&gt;&gt; &gt; 智力快照: 该个体曾执行 [{data.lore}]，智商已锁定。</p>
-            <button onClick={() => setStep('q1')} className="mt-6 border border-green-500 px-4 py-2 hover:bg-green-500 hover:text-black transition-all"> [ 开启试炼 ] </button>
-          </div>
-        )}
+        <div className="text-2xl md:text-3xl leading-relaxed mb-8 min-h-[140px]">
+          {step === 'intro' && (
+            <Typewriter
+              text={`&gt;&gt; 系统报告：\n检测到高能显眼包：${data.target_name}。\n降临坐标：${data.site}。\n系统评定：该个体曾执行过[${data.lore}]，初步判定为“逻辑缺失型”生物。`}
+              onComplete={() => setShowOptions(true)}
+            />
+          )}
 
-        {step === 'q1' && (
-          <div className="space-y-4">
-            <p>问题 1: 在这种鬼地方，你打算怎么展示个人魅力？</p>
-            {matrix.q1.map((opt, i) => (
-              <button
-                key={i}
-                onClick={() => {setPath({...path, q1: i}); setStep('q2')}}
-                className="block w-full text-left p-2 hover:bg-green-900 border border-transparent hover:border-green-500"
-              >
-                &gt; {opt.text}
-              </button>
-            ))}
-          </div>
-        )}
+          {step === 'q1' && (
+            <Typewriter
+              text={`当前环境极度尴尬，你手中握着唯一的求生工具：【${data.item}】。请问你打算：`}
+              onComplete={() => setShowOptions(true)}
+            />
+          )}
 
-        {step === 'q2' && (
-          <div className="space-y-4">
-            <p>问题 2: 此时突然跳出一只盯着你看的野猪，你打算？</p>
-            {matrix.q2[path.q1].map((opt, i) => (
-              <button
-                key={i}
-                onClick={() => {setPath({...path, q2: i}); setStep('scene')}}
-                className="block w-full text-left p-2 hover:bg-green-900 border border-transparent hover:border-green-500"
-              >
-                &gt;&gt;&gt; &gt; {opt.text}
-              </button>
-            ))}
-          </div>
-        )}
+          {step === 'q2' && (
+            <Typewriter
+              text={`面对这种局面，你刚才的举动让空气凝固了 3 秒。现在，你决定：`}
+              onComplete={() => setShowOptions(true)}
+            />
+          )}
 
-        {step === 'scene' && (
-          <div className="space-y-4">
-            <p>{matrix.scenes[path.q1][path.q2].act}</p>
-            <p>{matrix.scenes[path.q1][path.q2].res}</p>
-            <button onClick={() => setStep('boss')} className="mt-4 border border-green-500 px-4 py-2 hover:bg-red-900 hover:border-red-500"> [ 糟了 ] </button>
-          </div>
-        )}
+          {step === 'scene' && (
+            <Typewriter
+              text={`${matrix.scenes[path.q1][path.path_q2 || 0].act}\n\n后果：${matrix.scenes[path.q1][path.path_q2 || 0].res}`}
+              onComplete={() => setShowOptions(true)}
+            />
+          )}
 
-        {step === 'boss' && (
-          <div className="space-y-6">
-            <p className="text-red-500 animate-pulse font-bold">!!! {data.fear_boss} 已锁定你 !!!</p>
-            <p>惩罚措施: {data.fear_punish}</p>
-            <div className="pt-4 border-t border-green-900">
-              <p className="text-yellow-500 mb-2">【生死提问】: {data.spell_question}</p>
-              <input
-                className="bg-black border-b border-green-500 w-full mb-4 text-xl focus:border-yellow-500 outline-none"
-                value={input}
-                onChange={e => setInput(e.target.value)}
-                autoFocus
-                maxLength={50}
-              />
-              <button onClick={handleVerify} className="w-full bg-green-900 py-2 border border-green-500 hover:bg-green-600 hover:text-black"> 交付答案 </button>
-              {attempts >= 3 && (
-                <button onClick={() => setStep('end')} className="w-full text-xs text-red-500 mt-4 underline italic">
-                  [ 算了，系统判定你已经彻底破防，直接滚吧 ]
-                </button>
-              )}
+          {step === 'boss' && (
+            <Typewriter
+              text={`!!! 警报 !!!\n由于你的表现太过于机灵，【${data.fear_boss}】被强制激活了！\n正在执行惩罚：${data.fear_punish}`}
+              onComplete={() => setShowOptions(true)}
+            />
+          )}
+
+          {step === 'end' && (
+            <div className="text-center animate-in fade-in duration-1000">
+              <p className="text-lg text-slate-400 mb-4">&gt;&gt; 副本格式化完成。正在回归现实...</p>
+              <p className="text-3xl font-bold mb-8">“这是 ${data.creator_nick} 给你的惊喜。”</p>
+              <div className="bg-yellow-50 border-4 border-yellow-400 p-8 rounded-2xl">
+                <p className="text-2xl font-bold">“{data.final_message}”</p>
+              </div>
             </div>
+          )}
+        </div>
+
+        {showOptions && step !== 'end' && (
+          <div className="space-y-4 animate-in slide-in-from-bottom-4 duration-500">
+            {step === 'intro' && (
+              <button onClick={() => {setStep('q1'); setShowOptions(false)}} className="w-full bg-blue-100 border-2 border-slate-800 p-4 rounded-xl font-bold text-xl shadow-[4px_4px_0_#475569] active:translate-y-1 active:shadow-none transition-all">
+                [ 接受试炼 ]
+              </button>
+            )}
+
+            {step === 'q1' && matrix.q1.map((opt, i) => (
+              <button key={i} onClick={() => {setPath({...path, q1: i}); setStep('q2'); setShowOptions(false)}} className="w-full text-left bg-slate-50 border-2 border-slate-800 p-4 rounded-xl font-medium text-lg shadow-[4px_4px_0_#475569] active:translate-y-1 active:shadow-none transition-all">
+                &gt; {opt.text.replace("${data.item}", data.item).replace("${data.lore}", data.lore)}
+              </button>
+            ))}
+
+            {step === 'q2' && matrix.q2[path.q1].map((opt, i) => (
+              <button key={i} onClick={() => {setPath({...path, path_q2: i}); setStep('scene'); setShowOptions(false)}} className="w-full text-left bg-slate-50 border-2 border-slate-800 p-4 rounded-xl font-medium text-lg shadow-[4px_4px_0_#475569] active:translate-y-1 active:shadow-none transition-all">
+                &gt;&gt; {opt.text.replace("${data.item}", data.item).replace("${data.lore}", data.lore)}
+              </button>
+            )}
+
+            {step === 'scene' && (
+              <button onClick={() => {setStep('boss'); setShowOptions(false)}} className="w-full bg-red-100 border-2 border-slate-800 p-4 rounded-xl font-bold text-xl shadow-[4px_4px_0_#475569] active:translate-y-1 active:shadow-none transition-all text-red-600">
+                [ 妈呀！快跑！ ]
+              </button>
+            )}
+
+            {step === 'boss' && (
+              <div className="p-4 bg-slate-50 border-2 border-slate-800 rounded-xl">
+                <p className="text-sm text-slate-500 mb-2">【生死提问】：{data.spell_question}</p>
+                <input
+                  className="w-full bg-white border-2 border-slate-800 p-2 rounded mb-4 text-xl outline-none"
+                  value={input}
+                  onChange={e => setInput(e.target.value)}
+                  autoFocus
+                />
+                <button onClick={() => {
+                  if (input.trim() === data.spell_answer) setStep('end');
+                  else alert("回答错误！主神系统判定你还是死在那次[" + data.lore + "]里比较好。");
+                }} className="w-full bg-slate-800 text-white p-3 rounded-xl font-bold text-xl transition-all">
+                  交付答案
+                </button>
+              </div>
+            )}
           </div>
         )}
 
         {step === 'end' && (
-          <div className="space-y-4 text-center">
-            <p className="text-gray-500 text-sm">&gt;&gt;&gt; &gt; 副本已崩塌。正在回归现实...</p>
-            <p className="text-xl">“这其实是 {data.creator_nick} 送你的赛博大礼包。”</p>
-            <div className="my-8 p-6 border-2 border-dashed border-green-500 bg-green-900/10">
-              <p className="text-2xl font-bold text-yellow-500">"{data.final_message}"</p>
-            </div>
-            <button onClick={() => window.location.href='/create'} className="text-xs opacity-50 hover:opacity-100"> 我也要整人 </button>
-          </div>
+          <button onClick={() => window.location.href='/create'} className="mt-8 text-slate-400 underline w-full text-center"> 我也想整人 </button>
         )}
-
       </div>
-    </div>
+    </main>
   );
 }
