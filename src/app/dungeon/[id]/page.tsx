@@ -47,13 +47,14 @@ export default function DungeonPage({ params }: { params: { id: string } }) {
   // UI 控制状态
   const [showOptions, setShowOptions] = useState(false);
   const [showAllCatOptions, setShowAllCatOptions] = useState(false);
+  const [hasClickedC, setHasClickedC] = useState(false); // 记录是否点过一次C选项
   const [btnPos, setBtnPos] = useState({ x: 0, y: 0 });
   const [isRotated, setIsRotated] = useState(false);
   const [bossFails, setBossFails] = useState(0);
   const [bossInput, setBossInput] = useState('');
   const [showPaper, setShowPaper] = useState(false);
 
-  // 【修改版】：瞬间出现，缓慢淡出的 Toast 提示框
+  // 【修改版】：完全瞬间出现/消失的 Toast，去除所有动画副作用
   const [toastMsg, setToastMsg] = useState('');
   const [toastTimer, setToastTimer] = useState<NodeJS.Timeout | null>(null);
 
@@ -146,12 +147,14 @@ export default function DungeonPage({ params }: { params: { id: string } }) {
   return (
     <div className="min-h-screen w-full bg-[#f1f5f9] flex flex-col items-center justify-center p-4">
 
-      {/* 【重点修改】：无淡入（transition-none），有淡出（transition-opacity duration-500） */}
-      <div className={`fixed top-12 left-0 right-0 z-50 flex justify-center pointer-events-none ${toastMsg ? 'opacity-100 transition-none' : 'opacity-0 transition-opacity duration-500'}`}>
-        <div className="bg-slate-900/95 text-white px-8 py-4 rounded-2xl shadow-2xl font-bold text-lg text-center max-w-[90%] break-words">
-          {toastMsg}
+      {/* 【重点修改】：使用条件渲染确保完全没有缩小的过渡残影，瞬间渲染和卸载 */}
+      {toastMsg && (
+        <div className="fixed top-12 left-0 right-0 z-50 flex justify-center pointer-events-none">
+          <div className="bg-slate-900/95 text-white px-8 py-4 rounded-2xl shadow-2xl font-bold text-lg text-center max-w-[90%] break-words">
+            {toastMsg}
+          </div>
         </div>
-      </div>
+      )}
 
       {step !== 'settlement' ? (
         <div className="bg-white max-w-2xl w-full border-4 border-slate-900 rounded-3xl solid-shadow p-8 md:p-12 transition-all duration-500 overflow-hidden">
@@ -201,7 +204,7 @@ export default function DungeonPage({ params }: { params: { id: string } }) {
               </div>
               {showOptions && (
                 <div className="space-y-4 animate-in slide-in-from-bottom">
-                  <input maxLength={20} value={thankYouMsg} onChange={e=>setThankYouMsg(e.target.value)} className="w-full border-b-4 border-slate-900 p-3 text-xl outline-none" placeholder="输入心里话(20字以内)"/>
+                  <input maxLength={15} value={thankYouMsg} onChange={e=>setThankYouMsg(e.target.value)} className="w-full border-b-4 border-slate-900 p-3 text-xl outline-none" placeholder="输入心里话(15字以内)"/>
                   <button onClick={() => { if(thankYouMsg) goStep('cat'); else showToast('心里话不能为空！'); }} className="w-full bg-slate-900 text-white p-4 rounded-xl font-bold text-xl active:translate-y-1">提交</button>
                 </div>
               )}
@@ -218,12 +221,16 @@ export default function DungeonPage({ params }: { params: { id: string } }) {
                   <button onClick={() => goStep('q2_A')} className="block w-full text-left bg-slate-50 border-2 border-slate-900 p-4 rounded-xl font-bold text-lg active:translate-y-1">A. 尝试友好交流：喵喵喵！（%#@-#&￥@！）</button>
                   <button onClick={() => goStep('q2_B')} className="block w-full text-left bg-slate-50 border-2 border-slate-900 p-4 rounded-xl font-bold text-lg active:translate-y-1">B. 什么？小猫！一把抱走</button>
                   <button onClick={() => {
-                    showToast("不是给你更多选项了吗？怎么还来压榨我。", 2500);
-                    setShowAllCatOptions(true);
+                    if (!hasClickedC) {
+                      setHasClickedC(true);
+                      setShowAllCatOptions(true);
+                    } else {
+                      showToast("不是给你更多选项了吗？怎么还来压榨我。", 2500);
+                    }
                   }} className="block w-full text-left bg-slate-50 border-2 border-slate-900 p-4 rounded-xl font-bold text-lg active:translate-y-1">C. 这都什么破选项，我选不出来</button>
 
                   {showAllCatOptions && (
-                    <div className="space-y-4 animate-in fade-in zoom-in duration-500 pt-2">
+                    <div className="space-y-4 animate-in fade-in duration-500 pt-2">
                       <button onClick={() => goStep('q2_D')} className="block w-full text-left bg-yellow-50 border-2 border-slate-900 p-4 rounded-xl font-bold text-lg active:translate-y-1">D. 被吓到</button>
                       <button onClick={() => goStep('q2_E')} className="block w-full text-left bg-yellow-50 border-2 border-slate-900 p-4 rounded-xl font-bold text-lg active:translate-y-1">E. 不知从哪里掏出一把猫粮</button>
                     </div>
@@ -331,7 +338,7 @@ export default function DungeonPage({ params }: { params: { id: string } }) {
                   <div className="bg-slate-100 border-2 border-dashed border-slate-900 p-4 rounded-xl text-sm font-bold text-slate-500 min-h-[60px]">
                     已表演：{talents.join('、') || '无'}
                   </div>
-                  <input maxLength={20} value={currentTalent} onChange={e=>setCurrentTalent(e.target.value)} className="w-full border-b-4 border-slate-900 p-3 text-xl outline-none" placeholder="输入才艺(20字以内)"/>
+                  <input maxLength={15} value={currentTalent} onChange={e=>setCurrentTalent(e.target.value)} className="w-full border-b-4 border-slate-900 p-3 text-xl outline-none" placeholder="输入才艺(15字以内)"/>
                   <button onClick={handleTalentPerform} className="w-full bg-slate-900 text-white p-4 rounded-xl font-bold text-xl active:translate-y-1">表演</button>
 
                   {talents.length >= 3 && (
@@ -388,7 +395,7 @@ export default function DungeonPage({ params }: { params: { id: string } }) {
               {showOptions && (
                 <div className="space-y-4 animate-in slide-in-from-bottom">
                   <p className="text-2xl font-black text-red-600">Q: {data.spell_question}</p>
-                  <input maxLength={20} value={bossInput} onChange={e=>setBossInput(e.target.value)} className="w-full border-b-4 border-slate-900 p-3 text-xl outline-none focus:bg-red-50" placeholder="输入答案..."/>
+                  <input maxLength={15} value={bossInput} onChange={e=>setBossInput(e.target.value)} className="w-full border-b-4 border-slate-900 p-3 text-xl outline-none focus:bg-red-50" placeholder="输入答案(15字以内)..."/>
                   <button onClick={() => {
                     if(bossInput.trim() === data.spell_answer) goStep('win_slip');
                     else {
