@@ -3,11 +3,12 @@ import { useState, useEffect } from 'react';
 import { STORY_MATRIX } from '../../../config/story';
 import { supabase } from '@/lib/supabase';
 
-// 纯净版打字机组件
+// 修复后的、情绪稳定的打字机组件
 const Typewriter = ({ text, onComplete }: { text: string; onComplete?: () => void }) => {
-  const [displayedText, setDisplayedText] = useState('');
+  const [displayedText, setDisplayedText] = useState("");
+
   useEffect(() => {
-    setDisplayedText('');
+    setDisplayedText("");
     let i = 0;
     const timer = setInterval(() => {
       setDisplayedText((prev) => prev + text.charAt(i));
@@ -16,9 +17,12 @@ const Typewriter = ({ text, onComplete }: { text: string; onComplete?: () => voi
         clearInterval(timer);
         if (onComplete) onComplete();
       }
-    }, 35);
+    }, 80); // 【调整速度】：数字越大打字越慢，80是一个很舒服的阅读速度
+
+    // 【关键修复】：这里去掉了 onComplete 依赖，防止输入框打字时引发重绘
     return () => clearInterval(timer);
-  }, [text, onComplete]);
+  }, [text]);
+
   return <span className="whitespace-pre-wrap">{displayedText}</span>;
 };
 
@@ -37,18 +41,13 @@ export default function DungeonPage({ params }: { params: { id: string } }) {
     fetchDungeon();
   }, [params.id]);
 
-  if (!data) {
-    return (
-      <div className="min-h-screen bg-[#e2e8f0] flex items-center justify-center font-bold text-slate-400 text-xl">
-        正在链接主神位面...
-      </div>
-    );
-  }
+  if (!data) return <div className="min-h-screen flex items-center justify-center font-bold text-slate-400 text-xl">正在链接主神位面...</div>;
 
   const matrix = STORY_MATRIX(data);
 
   return (
-    <div className="min-h-screen bg-[#e2e8f0] flex flex-col items-center justify-center p-4 text-slate-800">
+    // 【修复居中】：使用了 min-h-screen 配合 flex items-center justify-center 确保绝对垂直+水平居中
+    <div className="min-h-screen flex items-center justify-center w-full p-4 text-slate-800">
       <div className="max-w-2xl w-full bg-white border-4 border-slate-800 rounded-2xl shadow-[8px_8px_0_#475569] p-8 md:p-12 relative overflow-hidden transition-all">
 
         {/* 文字展示区 */}
@@ -131,7 +130,7 @@ export default function DungeonPage({ params }: { params: { id: string } }) {
                 <p className="text-sm font-bold text-slate-500 mb-2">【生死提问】</p>
                 <p className="text-xl font-bold mb-4 text-blue-600">Q: {data.spell_question}</p>
                 <input
-                  className="w-full bg-white border-2 border-slate-800 p-3 rounded-lg mb-4 text-xl outline-none focus:ring-4 focus:ring-blue-100"
+                  className="w-full bg-white border-2 border-slate-800 p-3 rounded-lg mb-4 text-xl focus:ring-4 focus:ring-blue-100 transition-all"
                   value={input}
                   onChange={(e) => setInput(e.target.value)}
                   placeholder="输入答案保命..."
@@ -140,7 +139,7 @@ export default function DungeonPage({ params }: { params: { id: string } }) {
                 <button onClick={() => {
                   if (input.trim() === data.spell_answer) setStep('end');
                   else alert("回答错误！主神系统判定你还是死在那次【" + data.lore + "】里比较好。");
-                }} className="w-full bg-slate-800 hover:bg-slate-700 text-white p-4 rounded-xl font-bold text-xl transition-all">
+                }} className="w-full bg-slate-800 hover:bg-slate-700 text-white p-4 rounded-xl font-bold text-xl transition-all mt-2">
                   交付答案
                 </button>
               </div>
