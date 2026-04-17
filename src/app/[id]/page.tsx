@@ -3,7 +3,6 @@ import { useState, useEffect, useRef } from 'react';
 import { supabase } from '@/lib/supabase';
 import { getRouteConfig, calculateSettlement } from '../../config/story';
 
-// 带停顿呼吸感的打字机
 const Typewriter = ({ text, onComplete }: { text: string; onComplete?: () => void }) => {
   const [displayedText, setDisplayedText] = useState("");
   const timerRef = useRef<NodeJS.Timeout | null>(null);
@@ -26,7 +25,7 @@ const Typewriter = ({ text, onComplete }: { text: string; onComplete?: () => voi
         if (onCompleteRef.current) {
           setTimeout(() => {
             if (onCompleteRef.current) onCompleteRef.current();
-          }, 600); // 打完字后停顿 600ms
+          }, 600);
         }
       }
     }, 45);
@@ -180,21 +179,18 @@ export default function DungeonPage({ params }: { params: { id: string } }) {
     }
   };
 
-  // 【响应式排版】：默认小屏幕字号，加了 md: 恢复大屏幕字号
   const labelClass = "retro-text text-[#8b5a2b] text-base md:text-lg font-bold mb-1 md:mb-2 tracking-widest";
   const valueClass = "font-sans text-[#3e3c38] text-lg md:text-xl font-black mb-4 md:mb-6 leading-relaxed";
 
   return (
     <div className="min-h-screen w-full bg-[#f1f5f9] flex flex-col items-center justify-center p-4">
 
-      {/* Toast 提示框 */}
       <div className={`fixed top-12 left-0 right-0 z-50 flex justify-center pointer-events-none transition-opacity duration-500 ${toastVisible ? 'opacity-100' : 'opacity-0'}`}>
         <div className="bg-slate-900/95 text-white px-6 py-3 md:px-8 md:py-4 rounded-2xl shadow-2xl font-bold text-base md:text-lg text-center max-w-[90%] break-words">
           {toastMsg}
         </div>
       </div>
 
-      {/* 唯一主卡片容器（响应式 Padding） */}
       <div className={`bg-white max-w-2xl w-full border-4 border-slate-900 rounded-3xl solid-shadow p-6 md:p-12 transition-all duration-500 overflow-hidden ${step === 'time_rift' && riftPhase === 1 ? 'animate-fierce-shake' : ''}`}>
 
         {step === 'intro' && (
@@ -419,9 +415,12 @@ export default function DungeonPage({ params }: { params: { id: string } }) {
 
             {riftPhase >= 2 && (
               <div className="relative w-[280px] h-[280px] md:w-[360px] md:h-[360px] flex items-center justify-center animate-in fade-in duration-500">
+                {/* 【重点修复】：这下马字彻底用正确写法围成圈了，而且屏幕变大会自动撑开 */}
                 <div className={`absolute inset-0 flex items-center justify-center ${riftPhase === 2 ? 'animate-spin-scale' : 'animate-slow-spin'}`}>
                   {Array.from({length: 16}).map((_, i) => (
-                    <span key={i} className="absolute text-2xl md:text-3xl font-black text-blue-600" style={{ transform: `rotate(${i * (360/16)}deg) translateY(-140px) md:translateY(-175px)` }}>马</span>
+                    <div key={i} className="absolute inset-0 flex items-center justify-center" style={{ transform: `rotate(${i * (360/16)}deg)` }}>
+                      <span className="text-2xl md:text-3xl font-black text-blue-600 -translate-y-[130px] md:-translate-y-[160px]">马</span>
+                    </div>
                   ))}
                 </div>
 
@@ -494,18 +493,19 @@ export default function DungeonPage({ params }: { params: { id: string } }) {
                   )}
                 </div>
 
-                <div className="w-full bg-slate-50 border-4 border-slate-900 p-4 md:p-6 rounded-2xl flex flex-col items-center">
+                {/* 【解开束缚】：去掉了外层死板的 p-6，给结算单让出宽度 */}
+                <div className="w-full flex flex-col items-center mt-8">
                   <p className="font-bold text-slate-500 mb-4 text-sm md:text-base">查收胜利结算报告：</p>
                   <button onClick={() => setShowSettlement(!showSettlement)} className="text-5xl md:text-6xl hover:scale-110 transition-transform mb-2">📜</button>
 
                   {showSettlement && (
-                    <div id="settlement-card" className="w-full retro-paper p-6 md:p-12 rounded-xl text-left animate-in zoom-in mt-6 relative overflow-hidden">
+                    <div id="settlement-card" className="w-full retro-paper border-4 border-slate-900 p-6 md:p-12 rounded-xl text-left animate-in zoom-in mt-6 relative overflow-hidden shadow-xl">
 
                       <div className="absolute top-4 right-4 md:top-6 md:right-6 w-16 h-16 md:w-24 md:h-24 border-[3px] md:border-[5px] border-double border-red-700/70 rounded-full text-red-700 font-black flex items-center justify-center -rotate-12 opacity-70 text-lg md:text-2xl tracking-widest font-serif z-10 pointer-events-none mix-blend-multiply select-none">
                         已通关
                       </div>
 
-                      <h2 className="text-2xl md:text-3xl retro-text font-black text-center mb-6 md:mb-8 text-[#5c4d3c] border-b-2 border-[#d4c4af] pb-4 md:pb-6">
+                      <h2 className="text-2xl md:text-3xl retro-text font-black text-center mb-6 md:mb-8 text-[#5c4d3c] border-b-2 border-[#d4c4af] pb-4 md:pb-6 pr-12 md:pr-16">
                         【{data.site}】副本结算单
                       </h2>
 
@@ -555,7 +555,7 @@ export default function DungeonPage({ params }: { params: { id: string } }) {
                         onClick={handleDownloadImage}
                         className="w-full mt-6 md:mt-8 bg-[#3e3c38] text-[#fdf6e3] p-3 md:p-4 rounded-xl font-bold text-lg md:text-xl active:translate-y-1 shadow-lg flex items-center justify-center gap-2"
                       >
-                        <span className="text-xl md:text-2xl">📥</span> 保存结算单
+                        <span className="text-xl md:text-2xl">📥</span> 保存战绩截图
                       </button>
                     </div>
                   )}
@@ -563,7 +563,7 @@ export default function DungeonPage({ params }: { params: { id: string } }) {
 
                 <button
                   onClick={() => window.location.href='/create'}
-                  className="w-full mt-2 md:mt-4 bg-gradient-to-br from-blue-500 to-indigo-600 text-white p-4 md:p-6 rounded-2xl font-black text-xl md:text-2xl active:translate-y-2 shadow-[0_6px_0_#1e3a8a] md:shadow-[0_8px_0_#1e3a8a] active:shadow-none transition-all animate-bounce"
+                  className="w-full mt-6 md:mt-8 bg-gradient-to-br from-blue-500 to-indigo-600 text-white p-4 md:p-6 rounded-2xl font-black text-xl md:text-2xl active:translate-y-2 shadow-[0_6px_0_#1e3a8a] md:shadow-[0_8px_0_#1e3a8a] active:shadow-none transition-all animate-bounce"
                 >
                   🔥 我也要去坑朋友！
                 </button>

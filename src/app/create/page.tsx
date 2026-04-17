@@ -35,77 +35,71 @@ export default function CreateDungeon() {
   return (
     <main className="min-h-screen w-full bg-[#f1f5f9] flex flex-col items-center py-6 md:py-12 px-4 font-sans relative">
 
-      {/* 【响应式】：缩小了外层卡片的 padding (p-6) 和下边距 */}
       <div className="bg-white max-w-3xl w-full border-4 border-slate-900 rounded-3xl shadow-[8px_8px_0_#1e293b] md:shadow-[12px_12px_0_#1e293b] p-6 sm:p-8 md:p-12 mb-6 md:mb-8 z-10">
 
-        {/* 【响应式】：缩小了标题字号和下边距 */}
-        <h1 className="text-2xl sm:text-3xl md:text-4xl font-black mb-8 md:mb-12 text-center text-slate-900 tracking-wider">
+        <h1 className="text-3xl md:text-4xl font-black mb-8 md:mb-12 text-center text-slate-900 tracking-wider">
           [ 副本生成器 ]
         </h1>
 
-        {/* 【响应式】：缩小了表单整体元素的间距 (space-y-6) */}
-        <form onSubmit={handleSubmit} className="space-y-6 md:space-y-10">
+        <form onSubmit={handleSubmit} className="space-y-8 md:space-y-10">
 
-          {/* 【响应式】：将栅格的缝隙变小 (gap-4) */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-8">
-            <div className="space-y-1 md:space-y-2">
-              <label className="text-xs md:text-sm font-bold text-slate-400">你的代号</label>
-              {/* 【响应式】：输入框的 padding 和文字变小 */}
-              <input name="creator_nick" required maxLength={15} onChange={handleChange} className="w-full border-b-4 border-slate-900 p-2 md:p-3 text-lg md:text-xl font-bold outline-none focus:bg-blue-50 transition-all" placeholder="例如：新世界的神" />
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8">
+            <div className="space-y-2">
+              <label className="text-sm font-bold text-slate-400">你的代号</label>
+              {/* 恢复了 text-xl */}
+              <input name="creator_nick" required maxLength={15} onChange={handleChange} className="w-full border-b-4 border-slate-900 p-3 text-xl font-bold outline-none focus:bg-blue-50 transition-all" placeholder="例如：新世界的神" />
             </div>
-            <div className="space-y-1 md:space-y-2">
-              <label className="text-xs md:text-sm font-bold text-slate-400">受害者姓名</label>
-              <input name="target_name" required maxLength={15} onChange={handleChange} className="w-full border-b-4 border-slate-900 p-2 md:p-3 text-lg md:text-xl font-bold outline-none focus:bg-blue-50 transition-all" placeholder="此处写朋友称号" />
+            <div className="space-y-2">
+              <label className="text-sm font-bold text-slate-400">受害者姓名</label>
+              <input name="target_name" required maxLength={15} onChange={handleChange} className="w-full border-b-4 border-slate-900 p-3 text-xl font-bold outline-none focus:bg-blue-50 transition-all" placeholder="此处写朋友称号" />
             </div>
           </div>
 
-          <div className="space-y-1 md:space-y-2">
-            <label className="text-xs md:text-sm font-bold text-slate-400">朋友做过的一件糗事</label>
-            <input name="lore" required maxLength={15} onChange={handleChange} className="w-full border-b-4 border-slate-900 p-2 md:p-3 text-lg md:text-xl font-bold outline-none focus:bg-yellow-50 transition-all" placeholder="例如：手机掉马桶还试图捞" />
+          <div className="space-y-2">
+            <label className="text-sm font-bold text-slate-400">朋友做过的一件糗事</label>
+            <input name="lore" required maxLength={15} onChange={handleChange} className="w-full border-b-4 border-slate-900 p-3 text-xl font-bold outline-none focus:bg-yellow-50 transition-all" placeholder="例如：手机掉马桶还试图捞" />
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-8">
-            <div className="space-y-1 md:space-y-2">
-              <label className="text-xs md:text-sm font-bold text-slate-400">你要把朋友传送到</label>
-              <input name="site" required maxLength={15} onChange={handleChange} className="w-full border-b-4 border-slate-900 p-2 md:p-3 text-lg md:text-xl font-bold outline-none focus:bg-slate-50 transition-all" placeholder="例如：王者峡谷，工位等" />
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8">
+            <div className="space-y-2">
+              <label className="text-sm font-bold text-slate-400">你要把朋友传送到</label>
+              <input name="site" required maxLength={15} onChange={handleChange} className="w-full border-b-4 border-slate-900 p-3 text-xl font-bold outline-none focus:bg-slate-50 transition-all" placeholder="例如：王者峡谷，工位等" />
             </div>
-            <div className="space-y-1 md:space-y-2">
-              <label className="text-xs md:text-sm font-bold text-slate-400">朋友的一件十分有个人特色的物品</label>
-              <input name="item" required maxLength={15} onChange={handleChange} className="w-full border-b-4 border-slate-900 p-2 md:p-3 text-lg md:text-xl font-bold outline-none focus:bg-slate-50 transition-all" placeholder="例如：一副只剩镜片的眼镜" />
-            </div>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-8 pt-4 border-t-2 border-dashed border-slate-200">
-            <div className="space-y-1 md:space-y-2">
-              <label className="text-xs md:text-sm font-bold text-slate-400">一个你朋友害怕/讨厌的家伙</label>
-              <input name="fear_boss" required maxLength={15} onChange={handleChange} className="w-full border-b-4 border-slate-900 p-2 md:p-3 text-lg md:text-xl font-bold outline-none focus:bg-red-50 transition-all" placeholder="例如：老板，大作业等" />
-            </div>
-            <div className="space-y-1 md:space-y-2">
-              <label className="text-xs md:text-sm font-bold text-slate-400">这个家伙的经典行为</label>
-              <input name="fear_punish" required maxLength={15} onChange={handleChange} className="w-full border-b-4 border-slate-900 p-2 md:p-3 text-lg md:text-xl font-bold outline-none focus:bg-red-50 transition-all" placeholder="例如：发消息：你到我办公室来一下" />
+            <div className="space-y-2">
+              <label className="text-sm font-bold text-slate-400">朋友的一件十分有个人特色的物品</label>
+              <input name="item" required maxLength={15} onChange={handleChange} className="w-full border-b-4 border-slate-900 p-3 text-xl font-bold outline-none focus:bg-slate-50 transition-all" placeholder="例如：一副只剩镜片的眼镜" />
             </div>
           </div>
 
-          <div className="space-y-4 md:space-y-6 pt-4 border-t-2 border-dashed border-slate-200">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-8">
-              <div className="space-y-1 md:space-y-2">
-                <label className="text-xs md:text-sm font-bold text-slate-400">一个你们两个都知道答案的问题</label>
-                <input name="spell_question" required maxLength={15} onChange={handleChange} className="w-full border-b-4 border-slate-900 p-2 md:p-3 text-lg md:text-xl font-bold outline-none focus:bg-purple-50 transition-all" placeholder="例如：你的第一个QQ签名是什么？" />
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8 pt-4 border-t-2 border-dashed border-slate-200">
+            <div className="space-y-2">
+              <label className="text-sm font-bold text-slate-400">一个你朋友害怕/讨厌的家伙</label>
+              <input name="fear_boss" required maxLength={15} onChange={handleChange} className="w-full border-b-4 border-slate-900 p-3 text-xl font-bold outline-none focus:bg-red-50 transition-all" placeholder="例如：老板，大作业等" />
+            </div>
+            <div className="space-y-2">
+              <label className="text-sm font-bold text-slate-400">这个家伙的经典行为</label>
+              <input name="fear_punish" required maxLength={15} onChange={handleChange} className="w-full border-b-4 border-slate-900 p-3 text-xl font-bold outline-none focus:bg-red-50 transition-all" placeholder="例如：发消息：你到我办公室来一下" />
+            </div>
+          </div>
+
+          <div className="space-y-6 pt-4 border-t-2 border-dashed border-slate-200">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8">
+              <div className="space-y-2">
+                <label className="text-sm font-bold text-slate-400">一个你们两个都知道答案的问题</label>
+                <input name="spell_question" required maxLength={15} onChange={handleChange} className="w-full border-b-4 border-slate-900 p-3 text-xl font-bold outline-none focus:bg-purple-50 transition-all" placeholder="例如：你的第一个QQ签名是什么？" />
               </div>
-              <div className="space-y-1 md:space-y-2">
-                <label className="text-xs md:text-sm font-bold text-slate-400">问题答案</label>
-                <input name="spell_answer" required maxLength={15} onChange={handleChange} className="w-full border-b-4 border-slate-900 p-2 md:p-3 text-lg md:text-xl font-bold outline-none focus:bg-purple-50 transition-all" placeholder="例如：不要迷恋哥。" />
+              <div className="space-y-2">
+                <label className="text-sm font-bold text-slate-400">问题答案</label>
+                <input name="spell_answer" required maxLength={15} onChange={handleChange} className="w-full border-b-4 border-slate-900 p-3 text-xl font-bold outline-none focus:bg-purple-50 transition-all" placeholder="例如：不要迷恋哥。" />
               </div>
             </div>
-            <div className="space-y-1 md:space-y-2">
-              <label className="text-xs md:text-sm font-bold text-slate-400">给朋友留下一句真心话吧！</label>
-              {/* 【响应式】：多行文本框的高度在手机端变矮 */}
-              <textarea name="final_message" required maxLength={15} onChange={handleChange} className="w-full bg-white border-4 border-slate-900 rounded-xl p-3 md:p-4 h-20 md:h-28 text-lg md:text-xl font-bold outline-none focus:ring-4 focus:ring-purple-100 resize-none transition-all" placeholder="写点感人的或者更损的..." />
+            <div className="space-y-2">
+              <label className="text-sm font-bold text-slate-400">给朋友留下一句真心话吧！</label>
+              <textarea name="final_message" required maxLength={15} onChange={handleChange} className="w-full bg-white border-4 border-slate-900 rounded-xl p-4 h-24 md:h-28 text-xl font-bold outline-none focus:ring-4 focus:ring-purple-100 resize-none transition-all" placeholder="写点感人的或者更损的..." />
             </div>
           </div>
 
-          {/* 【响应式】：生成按钮在手机端稍微矮一点 */}
-          <button type="submit" disabled={loading} className="w-full bg-slate-900 text-white py-4 md:py-5 rounded-2xl font-black text-xl md:text-2xl hover:bg-blue-600 transition-all shadow-[4px_4px_0_#334155] md:shadow-[6px_6px_0_#334155] active:translate-y-1 disabled:opacity-50 mt-6 md:mt-8">
+          <button type="submit" disabled={loading} className="w-full bg-slate-900 text-white py-5 rounded-2xl font-black text-2xl hover:bg-blue-600 transition-all shadow-[4px_4px_0_#334155] md:shadow-[6px_6px_0_#334155] active:translate-y-1 disabled:opacity-50 mt-8">
             {loading ? '炼丹中...' : '[ 为朋友生成专属副本 ]'}
           </button>
         </form>
