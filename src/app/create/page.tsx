@@ -114,7 +114,7 @@ export default function CreateDungeon() {
                 <p className="font-bold mb-4 text-slate-600 text-sm">请长按下方文字框手动复制链接：</p>
                 <div className="bg-blue-50 border-4 border-slate-900 p-4 rounded-2xl mb-8 break-all select-all cursor-text text-left">
                   <span className="text-slate-800 font-bold text-lg leading-relaxed">
-                    {typeof window !== 'undefined' ? window.location.origin : ''}/dungeon/{createdId}
+                    https://bazinga66.top/{createdId}
                   </span>
                 </div>
                 <button onClick={() => window.location.reload()} className="w-full bg-slate-900 text-white py-4 rounded-xl font-bold text-xl shadow-[4px_4px_0_#334155] active:translate-y-1 transition-all">完成并再整一个</button>
