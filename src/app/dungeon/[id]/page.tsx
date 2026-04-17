@@ -23,6 +23,9 @@ export default function DungeonPage({ params }: { params: { id: string } }) {
   const [bossFails, setBossFails] = useState(0);
   const [bossInput, setBossInput] = useState('');
 
+  // 【修复报错】：补充丢失的 showPaper 状态声明
+  const [showPaper, setShowPaper] = useState(false);
+
   useEffect(() => {
     const fetchDungeon = async () => {
       const { data: d } = await supabase.from('dungeons').select('*').eq('id', params.id).single();
