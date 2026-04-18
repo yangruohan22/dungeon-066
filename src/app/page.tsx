@@ -34,7 +34,7 @@ export default function HomePage() {
         {/* 【响应式】：缩小了警告框的 padding 和文字 */}
         <div className="space-y-3 md:space-y-4 text-left bg-slate-50 border-4 border-slate-900 p-4 md:p-6 rounded-2xl mb-8 md:mb-10">
           <p className="text-base md:text-lg font-bold text-slate-600">
-            <span className="text-red-500 mr-2">⚠️</span> 警告：本系统极具杀伤力！
+            <span className="text-red-500 mr-2">⚠️</span> 警告：本系统没什么杀伤力！
           </p>
           <p className="text-sm md:text-base font-bold text-slate-500 leading-relaxed">
             在这里，你可以为你的朋友量身定制一场天马行空的副本冒险。对朋友越了解，生成的副本越有趣哦~
