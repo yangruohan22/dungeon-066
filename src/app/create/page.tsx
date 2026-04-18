@@ -10,7 +10,6 @@ export default function CreateDungeon() {
   });
 
   const [showPay, setShowPay] = useState(false);
-  const [isPaid, setIsPaid] = useState(false);
   const [createdId, setCreatedId] = useState('');
   const [loading, setLoading] = useState(false);
 
@@ -21,10 +20,29 @@ export default function CreateDungeon() {
   const handleSubmit = async (e: any) => {
     e.preventDefault();
     setLoading(true);
+
+    // 【内容安检逻辑】
+    const combinedText = Object.values(formData).join(' ');
+    try {
+      const censorRes = await fetch('/api/censor', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ text: combinedText })
+      });
+      const censorData = await censorRes.json();
+      if (!censorData.safe) {
+        alert("⚠️ 您的输入包含违规或敏感词汇，请修改后重试！");
+        setLoading(false);
+        return;
+      }
+    } catch (err) {
+      console.error("审核请求失败", err);
+    }
+
+    // 执行存入数据库
     const { data, error } = await supabase.from('dungeons').insert([formData]).select().single();
     if (!error) {
       setCreatedId(data.id);
-      setIsPaid(false);
       setShowPay(true);
     } else {
       alert("创建失败，网络波动！");
@@ -34,19 +52,15 @@ export default function CreateDungeon() {
 
   return (
     <main className="min-h-screen w-full bg-[#f1f5f9] flex flex-col items-center py-6 md:py-12 px-4 font-sans relative">
-
       <div className="bg-white max-w-3xl w-full border-4 border-slate-900 rounded-3xl shadow-[8px_8px_0_#1e293b] md:shadow-[12px_12px_0_#1e293b] p-6 sm:p-8 md:p-12 mb-6 md:mb-8 z-10">
-
         <h1 className="text-3xl md:text-4xl font-black mb-8 md:mb-12 text-center text-slate-900 tracking-wider">
           [ 副本生成器 ]
         </h1>
 
         <form onSubmit={handleSubmit} className="space-y-8 md:space-y-10">
-
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8">
             <div className="space-y-2">
               <label className="text-sm font-bold text-slate-400">你的代号</label>
-              {/* 恢复了 text-xl */}
               <input name="creator_nick" required maxLength={15} onChange={handleChange} className="w-full border-b-4 border-slate-900 p-3 text-xl font-bold outline-none focus:bg-blue-50 transition-all" placeholder="例如：新世界的神" />
             </div>
             <div className="space-y-2">
@@ -66,14 +80,14 @@ export default function CreateDungeon() {
               <input name="site" required maxLength={15} onChange={handleChange} className="w-full border-b-4 border-slate-900 p-3 text-xl font-bold outline-none focus:bg-slate-50 transition-all" placeholder="例如：王者峡谷，工位等" />
             </div>
             <div className="space-y-2">
-              <label className="text-sm font-bold text-slate-400">朋友的一件十分有个人特色的物品</label>
+              <label className="text-sm font-bold text-slate-400">朋友的一件很有特色的物品</label>
               <input name="item" required maxLength={15} onChange={handleChange} className="w-full border-b-4 border-slate-900 p-3 text-xl font-bold outline-none focus:bg-slate-50 transition-all" placeholder="例如：一副只剩镜片的眼镜" />
             </div>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8 pt-4 border-t-2 border-dashed border-slate-200">
             <div className="space-y-2">
-              <label className="text-sm font-bold text-slate-400">一个你朋友害怕/讨厌的家伙</label>
+              <label className="text-sm font-bold text-slate-400">一个朋友害怕的家伙</label>
               <input name="fear_boss" required maxLength={15} onChange={handleChange} className="w-full border-b-4 border-slate-900 p-3 text-xl font-bold outline-none focus:bg-red-50 transition-all" placeholder="例如：老板，大作业等" />
             </div>
             <div className="space-y-2">
@@ -85,7 +99,7 @@ export default function CreateDungeon() {
           <div className="space-y-6 pt-4 border-t-2 border-dashed border-slate-200">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8">
               <div className="space-y-2">
-                <label className="text-sm font-bold text-slate-400">一个你们两个都知道答案的问题</label>
+                <label className="text-sm font-bold text-slate-400">一个你们都知道答案的问题</label>
                 <input name="spell_question" required maxLength={15} onChange={handleChange} className="w-full border-b-4 border-slate-900 p-3 text-xl font-bold outline-none focus:bg-purple-50 transition-all" placeholder="例如：你的第一个QQ签名是什么？" />
               </div>
               <div className="space-y-2">
@@ -99,7 +113,7 @@ export default function CreateDungeon() {
             </div>
           </div>
 
-          <button type="submit" disabled={loading} className="w-full bg-slate-900 text-white py-5 rounded-2xl font-black text-2xl hover:bg-blue-600 transition-all shadow-[4px_4px_0_#334155] md:shadow-[6px_6px_0_#334155] active:translate-y-1 disabled:opacity-50 mt-8">
+          <button type="submit" disabled={loading} className="w-full bg-slate-900 text-white py-5 rounded-2xl font-black text-2xl hover:bg-blue-600 transition-all shadow-[4px_4px_0_#334155] md:shadow-[6px_6px_0_#334155] active:translate-y-1 mt-8">
             {loading ? '炼丹中...' : '[ 为朋友生成专属副本 ]'}
           </button>
         </form>
@@ -107,33 +121,18 @@ export default function CreateDungeon() {
 
       {showPay && (
         <div className="fixed inset-0 bg-slate-900/80 flex items-center justify-center p-4 z-50">
-          <div className="bg-white border-4 border-slate-900 p-6 md:p-8 max-w-sm w-full text-center rounded-3xl shadow-[8px_8px_0_#000] md:shadow-[12px_12px_0_#000] animate-in zoom-in duration-300">
-            {!isPaid ? (
-              <>
-                <h2 className="text-2xl md:text-3xl font-black mb-4 md:mb-6 text-slate-800">达成契约</h2>
-                <div className="w-40 h-40 md:w-48 md:h-48 bg-slate-100 mx-auto mb-4 md:mb-6 flex items-center justify-center border-4 border-dashed border-slate-400 rounded-2xl">
-                   <span className="text-slate-400 font-bold text-sm md:text-base">假装这是一个付款码</span>
-                </div>
-                <p className="font-bold mb-6 md:mb-8 text-slate-500 text-xs md:text-sm">支付66个鬼点子（100个鬼点子=1元），助力炼丹。</p>
-                <button onClick={() => setIsPaid(true)} className="w-full bg-blue-600 text-white py-3 md:py-4 rounded-xl font-bold text-lg md:text-xl mb-4 shadow-[4px_4px_0_#1e3a8a] active:translate-y-1 transition-all">我已支付！</button>
-                <button onClick={() => setShowPay(false)} className="text-slate-400 hover:text-slate-600 underline font-bold text-sm md:text-base"> 返回修改 </button>
-              </>
-            ) : (
-              <div className="animate-in fade-in zoom-in duration-500">
-                <h2 className="text-xl md:text-2xl font-black mb-4 text-green-600">契约已生效！快忽悠朋友来体验吧！</h2>
-                <p className="font-bold mb-4 text-slate-600 text-xs md:text-sm">请长按下方文字框手动复制链接：</p>
-                <div className="bg-blue-50 border-4 border-slate-900 p-3 md:p-4 rounded-2xl mb-6 md:mb-8 break-all select-all cursor-text text-left">
-                  <span className="text-slate-800 font-bold text-base md:text-lg leading-relaxed">
-                    https://bazinga66.top/{createdId}
-                  </span>
-                </div>
-                <button onClick={() => window.location.reload()} className="w-full bg-slate-900 text-white py-3 md:py-4 rounded-xl font-bold text-lg md:text-xl shadow-[4px_4px_0_#334155] active:translate-y-1 transition-all">完成并再整一个</button>
-              </div>
-            )}
+          <div className="bg-white border-4 border-slate-900 p-6 md:p-8 max-w-sm w-full text-center rounded-3xl shadow-[8px_8px_0_#000] animate-in zoom-in duration-300">
+            <h2 className="text-xl md:text-2xl font-black mb-4 text-green-600">契约已生效！</h2>
+            <p className="font-bold mb-4 text-slate-600 text-sm">长按下方文字框手动复制链接：</p>
+            <div className="bg-blue-50 border-4 border-slate-900 p-3 md:p-4 rounded-2xl mb-8 break-all select-all cursor-text text-left">
+              <span className="text-slate-800 font-bold text-base md:text-lg leading-relaxed">
+                https://bazinga66.top/{createdId}
+              </span>
+            </div>
+            <button onClick={() => window.location.reload()} className="w-full bg-slate-900 text-white py-3 md:py-4 rounded-xl font-bold text-lg md:text-xl active:translate-y-1">完成并再整一个</button>
           </div>
         </div>
       )}
-
       <LegalFooter />
     </main>
   );

@@ -3,6 +3,7 @@ import { useState, useEffect, useRef } from 'react';
 import { supabase } from '@/lib/supabase';
 import { getRouteConfig, calculateSettlement } from '../../config/story';
 
+// 带停顿呼吸感的打字机
 const Typewriter = ({ text, onComplete }: { text: string; onComplete?: () => void }) => {
   const [displayedText, setDisplayedText] = useState("");
   const timerRef = useRef<NodeJS.Timeout | null>(null);
@@ -25,7 +26,7 @@ const Typewriter = ({ text, onComplete }: { text: string; onComplete?: () => voi
         if (onCompleteRef.current) {
           setTimeout(() => {
             if (onCompleteRef.current) onCompleteRef.current();
-          }, 600);
+          }, 600); // 打完字后停顿 600ms
         }
       }
     }, 45);
@@ -85,6 +86,25 @@ export default function DungeonPage({ params }: { params: { id: string } }) {
     }
   };
 
+  // ==========================================
+  // 【新增】通用内容审核函数（对接你刚写的 API）
+  // ==========================================
+  const checkTextSafe = async (text: string) => {
+    if (!text.trim()) return true;
+    try {
+      const res = await fetch('/api/censor', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ text })
+      });
+      const data = await res.json();
+      return data.safe;
+    } catch (err) {
+      console.error('内容审核失败，默认放行', err);
+      return true;
+    }
+  };
+
   useEffect(() => {
     const fetchDungeon = async () => {
       const { data: d } = await supabase.from('dungeons').select('*').eq('id', params.id).single();
@@ -129,8 +149,16 @@ export default function DungeonPage({ params }: { params: { id: string } }) {
     }
   };
 
-  const handleTalentPerform = () => {
+  // 【修改】加入异步审核的才艺表演
+  const handleTalentPerform = async () => {
     if (!currentTalent.trim()) return;
+
+    const isSafe = await checkTextSafe(currentTalent);
+    if (!isSafe) {
+      showToast('⚠️ 输入内容包含敏感词汇，请修改！', 2500);
+      return;
+    }
+
     if (talents.length < 3) {
       setTalents([...talents, currentTalent]);
       setCurrentTalent('');
@@ -179,7 +207,6 @@ export default function DungeonPage({ params }: { params: { id: string } }) {
     }
   };
 
-  // 【优化】：稍微减小了手机端的 marginBottom，让排版更紧凑
   const labelClass = "retro-text text-[#8b5a2b] text-sm md:text-lg font-bold mb-1 md:mb-2 tracking-widest";
   const valueClass = "font-sans text-[#3e3c38] text-base md:text-xl font-black mb-3 md:mb-6 leading-normal md:leading-relaxed";
 
@@ -240,7 +267,20 @@ export default function DungeonPage({ params }: { params: { id: string } }) {
             {showOptions && (
               <div className="space-y-4 animate-in slide-in-from-bottom">
                 <input maxLength={15} value={thankYouMsg} onChange={e=>setThankYouMsg(e.target.value)} className="w-full border-b-4 border-slate-900 p-3 text-lg md:text-xl outline-none" placeholder="输入心里话(15字以内)"/>
-                <button onClick={() => { if(thankYouMsg) goStep('cat'); else showToast('心里话不能为空！'); }} className="w-full bg-slate-900 text-white p-3 md:p-4 rounded-xl font-bold text-lg md:text-xl active:translate-y-1">提交</button>
+
+                {/* 【修改】加入异步审核的感谢语提交 */}
+                <button onClick={async () => {
+                  if(!thankYouMsg) {
+                    showToast('心里话不能为空！');
+                    return;
+                  }
+                  const isSafe = await checkTextSafe(thankYouMsg);
+                  if (isSafe) {
+                    goStep('cat');
+                  } else {
+                    showToast('⚠️ 输入内容包含敏感词汇，请修改！', 2500);
+                  }
+                }} className="w-full bg-slate-900 text-white p-3 md:p-4 rounded-xl font-bold text-lg md:text-xl active:translate-y-1">提交</button>
               </div>
             )}
           </div>
@@ -448,7 +488,16 @@ export default function DungeonPage({ params }: { params: { id: string } }) {
               <div className="space-y-4 animate-in slide-in-from-bottom">
                 <p className="text-xl md:text-2xl font-black text-red-600">Q: {data.spell_question}</p>
                 <input maxLength={15} value={bossInput} onChange={e=>setBossInput(e.target.value)} className="w-full border-b-4 border-slate-900 p-3 text-lg md:text-xl outline-none focus:bg-red-50" placeholder="输入答案(15字以内)..."/>
-                <button onClick={() => {
+
+                {/* 【修改】加入异步审核的 Boss 答案 */}
+                <button onClick={async () => {
+                  if(!bossInput.trim()) return;
+                  const isSafe = await checkTextSafe(bossInput);
+                  if (!isSafe) {
+                     showToast('⚠️ 输入内容包含敏感词汇，请修改！', 2500);
+                     return;
+                  }
+
                   if(bossInput.trim() === data.spell_answer) goStep('win_slip');
                   else {
                     setBossFails(prev => prev + 1);
@@ -466,6 +515,7 @@ export default function DungeonPage({ params }: { params: { id: string } }) {
           </div>
         )}
 
+        {/* 终极融合页面：小纸条 + 结算单 + 坑朋友大按钮 */}
         {step === 'win_slip' && (
           <div className="text-center w-full animate-in fade-in duration-700">
             <div className="text-xl md:text-2xl font-black text-green-600 min-h-[80px]">
@@ -497,15 +547,13 @@ export default function DungeonPage({ params }: { params: { id: string } }) {
                   <button onClick={() => setShowSettlement(!showSettlement)} className="text-5xl md:text-6xl hover:scale-110 transition-transform mb-2">📜</button>
 
                   {showSettlement && (
-                    /* 【修复】：去除了外面多余的 p-6 嵌套，极大减小了手机端特有的 px-4 内边距 (Padding)，将横向空间彻底还给文字 */
                     <div id="settlement-card" className="w-full retro-paper border-4 border-slate-900 px-4 py-6 md:p-12 rounded-xl text-left animate-in zoom-in mt-6 relative overflow-hidden shadow-xl">
 
                       <div className="absolute top-2 right-2 md:top-6 md:right-6 w-16 h-16 md:w-24 md:h-24 border-[3px] md:border-[5px] border-double border-red-700/70 rounded-full text-red-700 font-black flex items-center justify-center -rotate-12 opacity-60 text-lg md:text-2xl tracking-widest font-serif z-0 pointer-events-none mix-blend-multiply select-none">
                         已通关
                       </div>
 
-                      {/* 标题居中，印章自然重叠，不再强行换行 */}
-                      <h2 className="text-2xl md:text-3xl retro-text font-black text-center mb-6 md:mb-8 text-[#5c4d3c] border-b-2 border-[#d4c4af] pb-4 md:pb-6 relative z-10">
+                      <h2 className="text-2xl md:text-3xl retro-text font-black text-center mb-6 md:mb-8 text-[#5c4d3c] border-b-2 border-[#d4c4af] pb-4 md:pb-6 pr-12 md:pr-16 relative z-10">
                         【{data.site}】副本结算单
                       </h2>
 
@@ -521,7 +569,6 @@ export default function DungeonPage({ params }: { params: { id: string } }) {
                         );
                       })()}
 
-                      {/* 用 Tailwind 纯样式控制分割线留白，不再受旧版 CSS 拖累 */}
                       <div className="border-t-2 border-dashed border-[#d4c4af] my-4 md:my-6"></div>
 
                       <p className={`${labelClass} mb-4 md:mb-6 leading-relaxed`}>
@@ -529,7 +576,6 @@ export default function DungeonPage({ params }: { params: { id: string } }) {
                       </p>
 
                       <p className={labelClass}>但是别灰心，你还有不少才艺：</p>
-                      {/* 【彻底修复】：去掉了 li 元素上自带超大下边距的 valueClass，将样式重写，子项行距完美贴合 */}
                       <ul className="list-disc list-outside ml-6 mb-4 md:mb-6 space-y-1 md:space-y-2">
                         {talents.map((t, i) => <li key={i} className="font-sans text-[#3e3c38] text-base md:text-xl font-black">{t}</li>)}
                       </ul>
@@ -557,7 +603,7 @@ export default function DungeonPage({ params }: { params: { id: string } }) {
                         onClick={handleDownloadImage}
                         className="w-full mt-6 md:mt-8 bg-[#3e3c38] text-[#fdf6e3] p-3 md:p-4 rounded-xl font-bold text-lg md:text-xl active:translate-y-1 shadow-lg flex items-center justify-center gap-2"
                       >
-                        <span className="text-xl md:text-2xl">📥</span> 保存结算单
+                        <span className="text-xl md:text-2xl">📥</span> 保存战绩截图
                       </button>
                     </div>
                   )}
