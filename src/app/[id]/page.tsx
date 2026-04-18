@@ -179,8 +179,9 @@ export default function DungeonPage({ params }: { params: { id: string } }) {
     }
   };
 
-  const labelClass = "retro-text text-[#8b5a2b] text-base md:text-lg font-bold mb-1 md:mb-2 tracking-widest";
-  const valueClass = "font-sans text-[#3e3c38] text-lg md:text-xl font-black mb-4 md:mb-6 leading-relaxed";
+  // 【优化】：稍微减小了手机端的 marginBottom，让排版更紧凑
+  const labelClass = "retro-text text-[#8b5a2b] text-sm md:text-lg font-bold mb-1 md:mb-2 tracking-widest";
+  const valueClass = "font-sans text-[#3e3c38] text-base md:text-xl font-black mb-3 md:mb-6 leading-normal md:leading-relaxed";
 
   return (
     <div className="min-h-screen w-full bg-[#f1f5f9] flex flex-col items-center justify-center p-4">
@@ -415,7 +416,6 @@ export default function DungeonPage({ params }: { params: { id: string } }) {
 
             {riftPhase >= 2 && (
               <div className="relative w-[280px] h-[280px] md:w-[360px] md:h-[360px] flex items-center justify-center animate-in fade-in duration-500">
-                {/* 【重点修复】：这下马字彻底用正确写法围成圈了，而且屏幕变大会自动撑开 */}
                 <div className={`absolute inset-0 flex items-center justify-center ${riftPhase === 2 ? 'animate-spin-scale' : 'animate-slow-spin'}`}>
                   {Array.from({length: 16}).map((_, i) => (
                     <div key={i} className="absolute inset-0 flex items-center justify-center" style={{ transform: `rotate(${i * (360/16)}deg)` }}>
@@ -466,7 +466,6 @@ export default function DungeonPage({ params }: { params: { id: string } }) {
           </div>
         )}
 
-        {/* 终极融合页面：小纸条 + 结算单 + 坑朋友大按钮 */}
         {step === 'win_slip' && (
           <div className="text-center w-full animate-in fade-in duration-700">
             <div className="text-xl md:text-2xl font-black text-green-600 min-h-[80px]">
@@ -493,26 +492,27 @@ export default function DungeonPage({ params }: { params: { id: string } }) {
                   )}
                 </div>
 
-                {/* 【解开束缚】：去掉了外层死板的 p-6，给结算单让出宽度 */}
                 <div className="w-full flex flex-col items-center mt-8">
                   <p className="font-bold text-slate-500 mb-4 text-sm md:text-base">查收胜利结算报告：</p>
                   <button onClick={() => setShowSettlement(!showSettlement)} className="text-5xl md:text-6xl hover:scale-110 transition-transform mb-2">📜</button>
 
                   {showSettlement && (
-                    <div id="settlement-card" className="w-full retro-paper border-4 border-slate-900 p-6 md:p-12 rounded-xl text-left animate-in zoom-in mt-6 relative overflow-hidden shadow-xl">
+                    /* 【修复】：去除了外面多余的 p-6 嵌套，极大减小了手机端特有的 px-4 内边距 (Padding)，将横向空间彻底还给文字 */
+                    <div id="settlement-card" className="w-full retro-paper border-4 border-slate-900 px-4 py-6 md:p-12 rounded-xl text-left animate-in zoom-in mt-6 relative overflow-hidden shadow-xl">
 
-                      <div className="absolute top-4 right-4 md:top-6 md:right-6 w-16 h-16 md:w-24 md:h-24 border-[3px] md:border-[5px] border-double border-red-700/70 rounded-full text-red-700 font-black flex items-center justify-center -rotate-12 opacity-70 text-lg md:text-2xl tracking-widest font-serif z-10 pointer-events-none mix-blend-multiply select-none">
+                      <div className="absolute top-2 right-2 md:top-6 md:right-6 w-16 h-16 md:w-24 md:h-24 border-[3px] md:border-[5px] border-double border-red-700/70 rounded-full text-red-700 font-black flex items-center justify-center -rotate-12 opacity-60 text-lg md:text-2xl tracking-widest font-serif z-0 pointer-events-none mix-blend-multiply select-none">
                         已通关
                       </div>
 
-                      <h2 className="text-2xl md:text-3xl retro-text font-black text-center mb-6 md:mb-8 text-[#5c4d3c] border-b-2 border-[#d4c4af] pb-4 md:pb-6 pr-12 md:pr-16">
+                      {/* 标题居中，印章自然重叠，不再强行换行 */}
+                      <h2 className="text-2xl md:text-3xl retro-text font-black text-center mb-6 md:mb-8 text-[#5c4d3c] border-b-2 border-[#d4c4af] pb-4 md:pb-6 relative z-10">
                         【{data.site}】副本结算单
                       </h2>
 
                       {(() => {
                         const res = calculateSettlement(route, actionCount, roarCounts, data);
                         return (
-                          <div className="space-y-1 md:space-y-2 mb-6 md:mb-8">
+                          <div className="space-y-1 md:space-y-2 mb-6 md:mb-8 relative z-10">
                             <p className={labelClass}>称号</p>
                             <p className={valueClass}>{res.title}</p>
                             <p className={labelClass}>你曾经：</p>
@@ -521,18 +521,20 @@ export default function DungeonPage({ params }: { params: { id: string } }) {
                         );
                       })()}
 
-                      <div className="retro-divider"></div>
+                      {/* 用 Tailwind 纯样式控制分割线留白，不再受旧版 CSS 拖累 */}
+                      <div className="border-t-2 border-dashed border-[#d4c4af] my-4 md:my-6"></div>
 
                       <p className={`${labelClass} mb-4 md:mb-6 leading-relaxed`}>
                         在【地球Online】游戏副本中，你掉进了时空裂缝，与【{data.fear_boss}】狭路相逢，经历了太多太多不如意的事情。
                       </p>
 
                       <p className={labelClass}>但是别灰心，你还有不少才艺：</p>
-                      <ul className="list-disc list-inside pl-2 mb-4 md:mb-6 space-y-1">
-                        {talents.map((t, i) => <li key={i} className={valueClass} style={{marginBottom: '0.25rem'}}>{t}</li>)}
+                      {/* 【彻底修复】：去掉了 li 元素上自带超大下边距的 valueClass，将样式重写，子项行距完美贴合 */}
+                      <ul className="list-disc list-outside ml-6 mb-4 md:mb-6 space-y-1 md:space-y-2">
+                        {talents.map((t, i) => <li key={i} className="font-sans text-[#3e3c38] text-base md:text-xl font-black">{t}</li>)}
                       </ul>
 
-                      <div className="retro-divider"></div>
+                      <div className="border-t-2 border-dashed border-[#d4c4af] my-4 md:my-6"></div>
 
                       <p className={`${labelClass} leading-relaxed`}>
                         更可贵的是，你对把你带到【{data.site}】的朋友【{data.creator_nick}】心怀感恩：
@@ -555,7 +557,7 @@ export default function DungeonPage({ params }: { params: { id: string } }) {
                         onClick={handleDownloadImage}
                         className="w-full mt-6 md:mt-8 bg-[#3e3c38] text-[#fdf6e3] p-3 md:p-4 rounded-xl font-bold text-lg md:text-xl active:translate-y-1 shadow-lg flex items-center justify-center gap-2"
                       >
-                        <span className="text-xl md:text-2xl">📥</span> 保存战绩截图
+                        <span className="text-xl md:text-2xl">📥</span> 保存结算单
                       </button>
                     </div>
                   )}
