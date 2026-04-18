@@ -19,7 +19,7 @@ export async function POST(req: Request) {
     // 如果内存里还没有词库，就去读你刚上传的 txt 文件
     if (!sensitiveWords) {
       // 指向你的 src/sensitive_words.txt 文件
-      const filePath = path.join(process.cwd(), 'src', 'sensitive_words.txt');
+      const filePath = path.join(process.cwd(), 'sensitive_words.txt');
 
       if (fs.existsSync(filePath)) {
         const fileContent = fs.readFileSync(filePath, 'utf-8');
