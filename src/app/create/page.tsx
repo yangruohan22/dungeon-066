@@ -87,11 +87,11 @@ export default function CreateDungeon() {
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8 pt-4 border-t-2 border-dashed border-slate-200">
             <div className="space-y-2">
-              <label className="text-sm font-bold text-slate-400">一个朋友害怕的家伙</label>
+              <label className="text-sm font-bold text-slate-400">一个朋友害怕或讨厌的家伙</label>
               <input name="fear_boss" required maxLength={15} onChange={handleChange} className="w-full border-b-4 border-slate-900 p-3 text-xl font-bold outline-none focus:bg-red-50 transition-all" placeholder="例如：老板，大作业等" />
             </div>
             <div className="space-y-2">
-              <label className="text-sm font-bold text-slate-400">这个家伙的经典行为</label>
+              <label className="text-sm font-bold text-slate-400">朋友讨厌的家伙的经典行为</label>
               <input name="fear_punish" required maxLength={15} onChange={handleChange} className="w-full border-b-4 border-slate-900 p-3 text-xl font-bold outline-none focus:bg-red-50 transition-all" placeholder="例如：发消息：你到我办公室来一下" />
             </div>
           </div>
