@@ -26,25 +26,21 @@ export async function POST(req: Request) {
       if (filePath) {
         const fileContent = fs.readFileSync(filePath, 'utf-8');
 
-        // 🚨 检查是否因为是 GBK 编码导致乱码
-        if (fileContent.includes('')) {
-          loadError = '🚨 系统错误：词库 txt 文件编码不是 UTF-8，读取出现乱码，请在 VSCode 重新用 UTF-8 保存！';
-          console.error(loadError);
-        } else {
-          sensitiveWords = fileContent
-            .split('\n')
-            .map(word => word.trim())
-            .filter(word => word.length > 1); // 过滤单字和空行
-          console.log(`✅ 成功加载词库，共 ${sensitiveWords.length} 个词`);
-          loadError = null;
-        }
+        // 【核心修改】：删掉了那个坑爹的 `includes('')` 检测，直接无脑加载所有词！
+        sensitiveWords = fileContent
+          .split('\n')
+          .map(word => word.trim())
+          .filter(word => word.length > 1); // 过滤单字和空行
+
+        console.log(`✅ 成功加载词库，共 ${sensitiveWords.length} 个词`);
+        loadError = null;
       } else {
         loadError = `🚨 系统错误：找不到敏感词文件！请检查 Vercel 打包是否丢失了该文件。`;
         console.error(loadError);
       }
     }
 
-    // 2. 如果词库加载失败，我们强行返回 safe: false 并带上错误原因，这样你就能在网页上直接看到报错
+    // 2. 如果文件真的找不到了，再抛出错误
     if (loadError) {
       return NextResponse.json({ safe: false, reason: loadError });
     }
@@ -54,7 +50,6 @@ export async function POST(req: Request) {
 
     if (badWord) {
       console.log(`🚫 成功拦截违规词: [${badWord}]`);
-      // 我们把命中的违禁词也返回去，方便你测试
       return NextResponse.json({ safe: false, reason: `触发敏感词汇：[${badWord}]，请修改！` });
     }
 
