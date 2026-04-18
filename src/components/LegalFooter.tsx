@@ -32,8 +32,7 @@ export default function LegalFooter() {
           <p>我们坚决抵制任何形式的网络暴力、恶意造谣与侵权行为。</p>
           <p>如果您发现本站生成的某个副本页面中包含侵犯您合法权益（如名誉权、隐私权），或包含其他违法违规内容，请立即通过以下方式联系我们：</p>
           <div className="bg-slate-100 p-4 rounded-xl border-2 border-slate-200 font-bold text-slate-800 text-center my-4">
-            申诉邮箱：admin@bazinga66.top <br/>
-            <span className="text-xs text-slate-400 font-normal">（提示：请在此处换成你真实能收信的邮箱）</span>
+            申诉邮箱：bazinga66@126.com <br/>
           </div>
           <p><strong>申诉须知：</strong>请在邮件中附上【违规副本的完整链接】以及相关的【侵权证明材料】。我们将在核实情况后的 24 小时内对违规页面进行封禁与永久删除处理。</p>
         </div>
