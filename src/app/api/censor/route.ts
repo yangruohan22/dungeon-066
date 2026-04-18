@@ -15,7 +15,6 @@ export async function POST(req: Request) {
 
     // 1. 如果还没加载过词库，尝试加载
     if (!sensitiveWords) {
-      // 自动兼容寻找词库文件的位置
       const rootPath = path.join(process.cwd(), 'sensitive_words.txt');
       const srcPath = path.join(process.cwd(), 'src', 'sensitive_words.txt');
 
@@ -26,9 +25,9 @@ export async function POST(req: Request) {
       if (filePath) {
         const fileContent = fs.readFileSync(filePath, 'utf-8');
 
-        // 【核心修改】：删掉了那个坑爹的 `includes('')` 检测，直接无脑加载所有词！
+        // 【破案了核心修改】：用正则表达式 /[\n\r、,]/ 同时按 顿号、逗号、回车 来切分词库！
         sensitiveWords = fileContent
-          .split('\n')
+          .split(/[\n\r、,]/)
           .map(word => word.trim())
           .filter(word => word.length > 1); // 过滤单字和空行
 
@@ -40,7 +39,6 @@ export async function POST(req: Request) {
       }
     }
 
-    // 2. 如果文件真的找不到了，再抛出错误
     if (loadError) {
       return NextResponse.json({ safe: false, reason: loadError });
     }
