@@ -2,8 +2,8 @@ import { NextResponse } from 'next/server';
 import fs from 'fs';
 import path from 'path';
 
-// 模块级全局变量：用于在内存中缓存词库，避免每次请求都去读硬盘
 let sensitiveWords: string[] | null = null;
+let loadError: string | null = null;
 
 export async function POST(req: Request) {
   try {
@@ -13,41 +13,55 @@ export async function POST(req: Request) {
       return NextResponse.json({ safe: true });
     }
 
-    // ==========================================
-    // 核心逻辑：读取本地敏感词库
-    // ==========================================
-    // 如果内存里还没有词库，就去读你刚上传的 txt 文件
+    // 1. 如果还没加载过词库，尝试加载
     if (!sensitiveWords) {
-      // 指向你的 src/sensitive_words.txt 文件
-      const filePath = path.join(process.cwd(), 'sensitive_words.txt');
+      // 自动兼容寻找词库文件的位置
+      const rootPath = path.join(process.cwd(), 'sensitive_words.txt');
+      const srcPath = path.join(process.cwd(), 'src', 'sensitive_words.txt');
 
-      if (fs.existsSync(filePath)) {
+      let filePath = '';
+      if (fs.existsSync(rootPath)) filePath = rootPath;
+      else if (fs.existsSync(srcPath)) filePath = srcPath;
+
+      if (filePath) {
         const fileContent = fs.readFileSync(filePath, 'utf-8');
-        // 按行分割，去掉多余的空格和空行
-        sensitiveWords = fileContent
-          .split('\n')
-          .map(word => word.trim())
-          .filter(word => word.length > 0);
+
+        // 🚨 检查是否因为是 GBK 编码导致乱码
+        if (fileContent.includes('')) {
+          loadError = '🚨 系统错误：词库 txt 文件编码不是 UTF-8，读取出现乱码，请在 VSCode 重新用 UTF-8 保存！';
+          console.error(loadError);
+        } else {
+          sensitiveWords = fileContent
+            .split('\n')
+            .map(word => word.trim())
+            .filter(word => word.length > 1); // 过滤单字和空行
+          console.log(`✅ 成功加载词库，共 ${sensitiveWords.length} 个词`);
+          loadError = null;
+        }
       } else {
-        console.warn("⚠️ 找不到敏感词文件");
-        sensitiveWords = [];
+        loadError = `🚨 系统错误：找不到敏感词文件！请检查 Vercel 打包是否丢失了该文件。`;
+        console.error(loadError);
       }
     }
 
-    // 开始遍历比对！如果用户填写的长文本里，包含了数组中的任何一个词，就触发警报
-    const isLocalBad = sensitiveWords.some(word => text.includes(word));
-
-    if (isLocalBad) {
-      // 发现违禁词，直接驳回！
-      return NextResponse.json({ safe: false, reason: '包含敏感词汇' });
+    // 2. 如果词库加载失败，我们强行返回 safe: false 并带上错误原因，这样你就能在网页上直接看到报错
+    if (loadError) {
+      return NextResponse.json({ safe: false, reason: loadError });
     }
 
-    // 安全通过
+    // 3. 遍历词库，查找是否命中
+    const badWord = sensitiveWords?.find(word => text.includes(word));
+
+    if (badWord) {
+      console.log(`🚫 成功拦截违规词: [${badWord}]`);
+      // 我们把命中的违禁词也返回去，方便你测试
+      return NextResponse.json({ safe: false, reason: `触发敏感词汇：[${badWord}]，请修改！` });
+    }
+
     return NextResponse.json({ safe: true });
 
   } catch (error) {
     console.error('审核接口报错:', error);
-    // 出大错时默认放行，防止系统直接罢工
     return NextResponse.json({ safe: true });
   }
 }

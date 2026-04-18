@@ -31,7 +31,7 @@ export default function CreateDungeon() {
       });
       const censorData = await censorRes.json();
       if (!censorData.safe) {
-        alert("⚠️ 您的输入包含违规或敏感词汇，请修改后重试！");
+        alert(censorData.reason || "⚠️ 您的输入包含违规或敏感词汇，请修改后重试！");
         setLoading(false);
         return;
       }
